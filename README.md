@@ -17,7 +17,7 @@
  приложение.
 
 #### Аналоги
--VK Musiq
--Яндекс Музыка
+- VK Musiq
+- Яндекс Музыка
 
 [Сонар](https://sonarcloud.io/project/overview?id=kykyy67_musiq)
