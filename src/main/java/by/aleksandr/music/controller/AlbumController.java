@@ -17,18 +17,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AlbumController {
 
-  private final AlbumService albumService;
-  @GetMapping
+    private final AlbumService albumService;
+    @GetMapping
   public List<AlbumDto> getAlbums(@RequestParam(name = "title", required = false) String title) {
-    return AlbumMapper.toDtoList(albumService.getAlbumsByTitle(title));
-  }
+        return AlbumMapper.toDtoList(albumService.getAlbumsByTitle(title));
+    }
 
-  @GetMapping("/{id}")
+    @GetMapping("/{id}")
   public ResponseEntity<AlbumDto> getAlbumById(@PathVariable("id") Long id) {
-    return albumService.getAlbumById(id)
+        return albumService.getAlbumById(id)
         .map(AlbumMapper::toDto)
         .map(ResponseEntity::ok)
         .orElseGet(() -> ResponseEntity.notFound().build());
-  }
+    }
 }
 

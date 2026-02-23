@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AlbumDto {
 
-  private Long id;
-  private String title;
-  private int releaseYear;
+    private Long id;
+    private String title;
+    private int releaseYear;
 }

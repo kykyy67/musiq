@@ -11,20 +11,20 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AlbumService {
 
-  private final AlbumRepository albumRepository;
+    private final AlbumRepository albumRepository;
 
-  public List<Album> getAllAlbums() {
-    return albumRepository.findAll();
-  }
-
-  public List<Album> getAlbumsByTitle(String title) {
-    if (title == null || title.isBlank()) {
-      return getAllAlbums();
+    public List<Album> getAllAlbums() {
+        return albumRepository.findAll();
     }
-    return albumRepository.findByTitleContainingIgnoreCase(title);
-  }
 
-  public Optional<Album> getAlbumById(Long id) {
-    return albumRepository.findById(id);
-  }
+    public List<Album> getAlbumsByTitle(String title) {
+        if (title == null || title.isBlank()) {
+            return getAllAlbums();
+        }
+        return albumRepository.findByTitleContainingIgnoreCase(title);
+    }
+
+    public Optional<Album> getAlbumById(Long id) {
+        return albumRepository.findById(id);
+    }
 }
