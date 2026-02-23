@@ -1,0 +1,16 @@
+server:
+    port: 8080
+
+spring:
+
+    application:
+        name: music
+
+    jpa:
+        hibernate:
+            ddl-auto: create
+
+    datasource:
+        url: jdbc:postgresql://localhost:5432/musicCatalog
+        username: postgres
+        password: password

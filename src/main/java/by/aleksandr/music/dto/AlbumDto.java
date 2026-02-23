@@ -1,0 +1,15 @@
+package by.aleksandr.music.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class AlbumDto {
+
+  private Long id;
+  private String title;
+  private int releaseYear;
+}
