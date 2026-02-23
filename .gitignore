@@ -31,3 +31,44 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Application Configuration ###
+# YAML configuration files
+*.yaml
+*.yml
+application.yaml
+application.yml
+application-*.yaml
+application-*.yml
+
+# Specific paths
+/src/main/resources/application.yaml
+/src/main/resources/application.yml
+/src/main/resources/application-*.yaml
+/src/main/resources/application-*.yml
+
+# Local profiles
+application-local.yaml
+application-local.yml
+application-dev.yaml
+application-dev.yml
+application-prod.yaml
+application-prod.yml
+
+# Secret configuration (if any)
+application-secret.yaml
+application-secret.yml
+secrets.yaml
+secrets.yml
+
+### Environment files ###
+.env
+.env.local
+.env.*.local
+
+### Backup files ###
+*.bak
+*.backup
+*.swp
+*.swo
+*~
