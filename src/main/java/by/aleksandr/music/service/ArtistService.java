@@ -75,7 +75,7 @@ public class ArtistService {
         album = albumRepository.save(album);
 
         if (simulateFailureAfterAlbum) {
-            throw new RuntimeException("ОШИБОЧКА");
+            throw new IllegalArgumentException("ОШИБОЧКА");
         }
 
         if (request.getTracks() != null) {
@@ -106,7 +106,7 @@ public class ArtistService {
         album = albumRepository.save(album);
 
         if (simulateFailureAfterAlbum) {
-            throw new RuntimeException("ОШибочка!-_-");
+            throw new IllegalArgumentException("ОШибочка!-_-");
         }
 
         if (request.getTracks() != null) {
