@@ -18,4 +18,7 @@
 - VK Musiq
 - Яндекс Музыка
 
+<img width="667" height="766" alt="image" src="https://github.com/user-attachments/assets/a23efb1a-124c-4664-a8fc-37ca67759915" />
+
+
 [Сонар](https://sonarcloud.io/project/overview?id=kykyy67_musiq)
