@@ -15,15 +15,13 @@ public final class AlbumMapper {
             return null;
         }
 
-        Long artistId = album.getArtist() != null ? album.getArtist().getId() : null;
+        Long artistId = (album.getArtist() != null) ? album.getArtist().getId() : null;
 
-        List<Long> genreIds = album.getGenres() == null
+        List<Long> genreIds = (album.getGenres() == null)
                 ? List.of()
                 : album.getGenres().stream().map(g -> g.getId()).toList();
 
-        Long currentAlbumId = album.getId();
-
-        List<TrackResponse> trackResponses = album.getTracks() == null
+        List<TrackResponse> trackResponses = (album.getTracks() == null)
                 ? List.of()
                 : album.getTracks().stream()
                 .map(t -> new TrackResponse(
@@ -31,7 +29,7 @@ public final class AlbumMapper {
                         t.getTitle(),
                         t.getDurationSeconds(),
                         album.getId(),
-                        album.getArtist() != null ? album.getArtist().getId() : null
+                        artistId
                 ))
                 .toList();
 
@@ -48,6 +46,8 @@ public final class AlbumMapper {
         if (albums == null) {
             return List.of();
         }
-        return albums.stream().map(AlbumMapper::toResponse).toList();
+        return albums.stream()
+                .map(AlbumMapper::toResponse)
+                .toList();
     }
 }
