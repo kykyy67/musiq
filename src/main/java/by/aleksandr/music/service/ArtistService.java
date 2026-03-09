@@ -64,30 +64,7 @@ public class ArtistService {
             ArtistWithAlbumAndTracksRequest request,
             boolean simulateFailureAfterAlbum) {
 
-        Artist artist = Artist.builder().name(request.getArtistName()).build();
-        artist = artistRepository.save(artist);
-
-        Album album = Album.builder()
-                .title(request.getAlbumTitle())
-                .releaseYear(request.getReleaseYear())
-                .artist(artist)
-                .build();
-        album = albumRepository.save(album);
-
-        if (simulateFailureAfterAlbum) {
-            throw new IllegalArgumentException("ОШИБОЧКА");
-        }
-
-        if (request.getTracks() != null) {
-            for (ArtistWithAlbumAndTracksRequest.TrackItem item : request.getTracks()) {
-                Track track = Track.builder()
-                        .title(item.getTitle())
-                        .durationSeconds(item.getDurationSeconds() != null ? item.getDurationSeconds() : 0)
-                        .album(album)
-                        .build();
-                trackRepository.save(track);
-            }
-        }
+        createArtist(request, simulateFailureAfterAlbum);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -95,6 +72,10 @@ public class ArtistService {
             ArtistWithAlbumAndTracksRequest request,
             boolean simulateFailureAfterAlbum) {
 
+        createArtist(request, simulateFailureAfterAlbum);
+    }
+
+    private Artist createArtist(ArtistWithAlbumAndTracksRequest request, boolean simulateFailureAfterAlbum) {
         Artist artist = Artist.builder().name(request.getArtistName()).build();
         artist = artistRepository.save(artist);
 
@@ -119,6 +100,7 @@ public class ArtistService {
                 trackRepository.save(track);
             }
         }
+        return artist;
     }
 }
 
