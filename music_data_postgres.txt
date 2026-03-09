@@ -1,0 +1,377 @@
+-- Тестовые данные для музыкального каталога (PostgreSQL)
+-- Предполагается, что схема уже создана (таблицы artists, albums, tracks, genres, users,
+-- album_genres, user_tracks), как в файле music_catalog_postgres.sql.
+--
+-- Как использовать в psql:
+--   \c musicCatalog
+--   \i music_data_postgres.txt
+
+-- Очистка (ОСТОРОЖНО: удалит все данные)
+TRUNCATE TABLE user_tracks, album_genres, tracks, albums, users, genres, artists RESTART IDENTITY CASCADE;
+
+-- ======================================================================
+-- Artists (все сразу: зарубежные, русские рок, современные)
+-- ======================================================================
+INSERT INTO artists (name) VALUES
+  ('Michael Jackson'),
+  ('AC/DC'),
+  ('Pink Floyd'),
+  ('Queen'),
+  ('Metallica'),
+  ('Кино'),
+  ('ДДТ'),
+  ('Ленинград'),
+  ('MORGENSHTERN'),
+  ('Скриптонит'),
+  ('FACE');
+
+-- ======================================================================
+-- Genres (все сразу)
+-- ======================================================================
+INSERT INTO genres (name) VALUES
+  ('Pop'),
+  ('Rock'),
+  ('Progressive Rock'),
+  ('Metal'),
+  ('Hard Rock'),
+  ('Русский рок'),
+  ('Панк-рок'),
+  ('Рэп'),
+  ('Хип-хоп');
+
+-- ======================================================================
+-- Albums (все, с привязкой к артистам по имени)
+-- ======================================================================
+INSERT INTO albums (title, release_year, artist_id) VALUES
+  -- Michael Jackson
+  ('Thriller', 1982, (SELECT id FROM artists WHERE name = 'Michael Jackson')),
+  ('Bad', 1987, (SELECT id FROM artists WHERE name = 'Michael Jackson')),
+
+  -- AC/DC
+  ('Back in Black', 1980, (SELECT id FROM artists WHERE name = 'AC/DC')),
+  ('Highway to Hell', 1979, (SELECT id FROM artists WHERE name = 'AC/DC')),
+
+  -- Pink Floyd
+  ('The Dark Side of the Moon', 1973, (SELECT id FROM artists WHERE name = 'Pink Floyd')),
+  ('The Wall', 1979, (SELECT id FROM artists WHERE name = 'Pink Floyd')),
+
+  -- Queen
+  ('A Night at the Opera', 1975, (SELECT id FROM artists WHERE name = 'Queen')),
+  ('Innuendo', 1991, (SELECT id FROM artists WHERE name = 'Queen')),
+
+  -- Metallica
+  ('Master of Puppets', 1986, (SELECT id FROM artists WHERE name = 'Metallica')),
+  ('Ride the Lightning', 1984, (SELECT id FROM artists WHERE name = 'Metallica')),
+
+  -- Кино
+  ('Группа крови', 1988, (SELECT id FROM artists WHERE name = 'Кино')),
+  ('Звезда по имени Солнце', 1989, (SELECT id FROM artists WHERE name = 'Кино')),
+
+  -- ДДТ
+  ('Это всё...', 1985, (SELECT id FROM artists WHERE name = 'ДДТ')),
+  ('Актриса весна', 1992, (SELECT id FROM artists WHERE name = 'ДДТ')),
+
+  -- Ленинград
+  ('Альбом для друзей', 1999, (SELECT id FROM artists WHERE name = 'Ленинград')),
+  ('Пираты XXI века', 2002, (SELECT id FROM artists WHERE name = 'Ленинград')),
+
+  -- MORGENSHTERN
+  ('Legendary Dust', 2020, (SELECT id FROM artists WHERE name = 'MORGENSHTERN')),
+  ('Last One', 2021, (SELECT id FROM artists WHERE name = 'MORGENSHTERN')),
+
+  -- Скриптонит
+  ('Дом с нормальными явлениями', 2015, (SELECT id FROM artists WHERE name = 'Скриптонит')),
+
+  -- FACE
+  ('Пути неисповедимы', 2017, (SELECT id FROM artists WHERE name = 'FACE'));
+
+-- ======================================================================
+-- Tracks (все треки, альбомы ищутся по названию и артисту)
+-- ======================================================================
+INSERT INTO tracks (title, duration_seconds, album_id) VALUES
+  -- Michael Jackson — Thriller
+  ('Wanna Be Startin'' Somethin''', 363,
+   (SELECT id FROM albums WHERE title = 'Thriller' AND artist_id = (SELECT id FROM artists WHERE name = 'Michael Jackson'))),
+  ('Thriller', 357,
+   (SELECT id FROM albums WHERE title = 'Thriller' AND artist_id = (SELECT id FROM artists WHERE name = 'Michael Jackson'))),
+  ('Beat It', 258,
+   (SELECT id FROM albums WHERE title = 'Thriller' AND artist_id = (SELECT id FROM artists WHERE name = 'Michael Jackson'))),
+
+  -- Michael Jackson — Bad
+  ('Bad', 247,
+   (SELECT id FROM albums WHERE title = 'Bad' AND artist_id = (SELECT id FROM artists WHERE name = 'Michael Jackson'))),
+  ('Smooth Criminal', 257,
+   (SELECT id FROM albums WHERE title = 'Bad' AND artist_id = (SELECT id FROM artists WHERE name = 'Michael Jackson'))),
+
+  -- AC/DC — Back in Black
+  ('Hells Bells', 312,
+   (SELECT id FROM albums WHERE title = 'Back in Black' AND artist_id = (SELECT id FROM artists WHERE name = 'AC/DC'))),
+  ('Shoot to Thrill', 315,
+   (SELECT id FROM albums WHERE title = 'Back in Black' AND artist_id = (SELECT id FROM artists WHERE name = 'AC/DC'))),
+  ('Back in Black', 255,
+   (SELECT id FROM albums WHERE title = 'Back in Black' AND artist_id = (SELECT id FROM artists WHERE name = 'AC/DC'))),
+
+  -- AC/DC — Highway to Hell
+  ('Highway to Hell', 208,
+   (SELECT id FROM albums WHERE title = 'Highway to Hell' AND artist_id = (SELECT id FROM artists WHERE name = 'AC/DC'))),
+  ('Touch Too Much', 252,
+   (SELECT id FROM albums WHERE title = 'Highway to Hell' AND artist_id = (SELECT id FROM artists WHERE name = 'AC/DC'))),
+
+  -- Pink Floyd — The Dark Side of the Moon
+  ('Speak to Me', 90,
+   (SELECT id FROM albums WHERE title = 'The Dark Side of the Moon' AND artist_id = (SELECT id FROM artists WHERE name = 'Pink Floyd'))),
+  ('Breathe', 163,
+   (SELECT id FROM albums WHERE title = 'The Dark Side of the Moon' AND artist_id = (SELECT id FROM artists WHERE name = 'Pink Floyd'))),
+  ('Time', 413,
+   (SELECT id FROM albums WHERE title = 'The Dark Side of the Moon' AND artist_id = (SELECT id FROM artists WHERE name = 'Pink Floyd'))),
+
+  -- Pink Floyd — The Wall
+  ('Another Brick in the Wall, Pt. 2', 240,
+   (SELECT id FROM albums WHERE title = 'The Wall' AND artist_id = (SELECT id FROM artists WHERE name = 'Pink Floyd'))),
+  ('Comfortably Numb', 384,
+   (SELECT id FROM albums WHERE title = 'The Wall' AND artist_id = (SELECT id FROM artists WHERE name = 'Pink Floyd'))),
+
+  -- Queen — A Night at the Opera
+  ('Bohemian Rhapsody', 354,
+   (SELECT id FROM albums WHERE title = 'A Night at the Opera' AND artist_id = (SELECT id FROM artists WHERE name = 'Queen'))),
+  ('Love of My Life', 220,
+   (SELECT id FROM albums WHERE title = 'A Night at the Opera' AND artist_id = (SELECT id FROM artists WHERE name = 'Queen'))),
+
+  -- Queen — Innuendo
+  ('Innuendo', 382,
+   (SELECT id FROM albums WHERE title = 'Innuendo' AND artist_id = (SELECT id FROM artists WHERE name = 'Queen'))),
+  ('The Show Must Go On', 262,
+   (SELECT id FROM albums WHERE title = 'Innuendo' AND artist_id = (SELECT id FROM artists WHERE name = 'Queen'))),
+
+  -- Metallica — Master of Puppets
+  ('Battery', 312,
+   (SELECT id FROM albums WHERE title = 'Master of Puppets' AND artist_id = (SELECT id FROM artists WHERE name = 'Metallica'))),
+  ('Master of Puppets', 515,
+   (SELECT id FROM albums WHERE title = 'Master of Puppets' AND artist_id = (SELECT id FROM artists WHERE name = 'Metallica'))),
+
+  -- Metallica — Ride the Lightning
+  ('Fight Fire with Fire', 284,
+   (SELECT id FROM albums WHERE title = 'Ride the Lightning' AND artist_id = (SELECT id FROM artists WHERE name = 'Metallica'))),
+  ('Fade to Black', 417,
+   (SELECT id FROM albums WHERE title = 'Ride the Lightning' AND artist_id = (SELECT id FROM artists WHERE name = 'Metallica'))),
+
+  -- Кино — Группа крови
+  ('Группа крови', 260,
+   (SELECT id FROM albums WHERE title = 'Группа крови' AND artist_id = (SELECT id FROM artists WHERE name = 'Кино'))),
+  ('Война', 230,
+   (SELECT id FROM albums WHERE title = 'Группа крови' AND artist_id = (SELECT id FROM artists WHERE name = 'Кино'))),
+
+  -- Кино — Звезда по имени Солнце
+  ('Звезда по имени Солнце', 210,
+   (SELECT id FROM albums WHERE title = 'Звезда по имени Солнце' AND artist_id = (SELECT id FROM artists WHERE name = 'Кино'))),
+  ('Пачка сигарет', 260,
+   (SELECT id FROM albums WHERE title = 'Звезда по имени Солнце' AND artist_id = (SELECT id FROM artists WHERE name = 'Кино'))),
+
+  -- ДДТ — Это всё...
+  ('Что такое осень', 240,
+   (SELECT id FROM albums WHERE title = 'Это всё...' AND artist_id = (SELECT id FROM artists WHERE name = 'ДДТ'))),
+  ('Осень', 250,
+   (SELECT id FROM albums WHERE title = 'Это всё...' AND artist_id = (SELECT id FROM artists WHERE name = 'ДДТ'))),
+
+  -- ДДТ — Актриса весна
+  ('Актриса весна', 260,
+   (SELECT id FROM albums WHERE title = 'Актриса весна' AND artist_id = (SELECT id FROM artists WHERE name = 'ДДТ'))),
+
+  -- Ленинград — Альбом для друзей
+  ('Дача', 210,
+   (SELECT id FROM albums WHERE title = 'Альбом для друзей' AND artist_id = (SELECT id FROM artists WHERE name = 'Ленинград'))),
+  ('Манера поведения', 200,
+   (SELECT id FROM albums WHERE title = 'Альбом для друзей' AND artist_id = (SELECT id FROM artists WHERE name = 'Ленинград'))),
+
+  -- Ленинград — Пираты XXI века
+  ('WWW', 190,
+   (SELECT id FROM albums WHERE title = 'Пираты XXI века' AND artist_id = (SELECT id FROM artists WHERE name = 'Ленинград'))),
+  ('Пираты XXI века', 195,
+   (SELECT id FROM albums WHERE title = 'Пираты XXI века' AND artist_id = (SELECT id FROM artists WHERE name = 'Ленинград'))),
+
+  -- MORGENSHTERN — Legendary Dust
+  ('ICE', 150,
+   (SELECT id FROM albums WHERE title = 'Legendary Dust' AND artist_id = (SELECT id FROM artists WHERE name = 'MORGENSHTERN'))),
+  ('Cadillac', 160,
+   (SELECT id FROM albums WHERE title = 'Legendary Dust' AND artist_id = (SELECT id FROM artists WHERE name = 'MORGENSHTERN'))),
+
+  -- MORGENSHTERN — Last One
+  ('Cristal & МОЁТ', 175,
+   (SELECT id FROM albums WHERE title = 'Last One' AND artist_id = (SELECT id FROM artists WHERE name = 'MORGENSHTERN'))),
+
+  -- Скриптонит — Дом с нормальными явлениями
+  ('Притон', 200,
+   (SELECT id FROM albums WHERE title = 'Дом с нормальными явлениями' AND artist_id = (SELECT id FROM artists WHERE name = 'Скриптонит'))),
+  ('Танцуй сама', 210,
+   (SELECT id FROM albums WHERE title = 'Дом с нормальными явлениями' AND artist_id = (SELECT id FROM artists WHERE name = 'Скриптонит'))),
+
+  -- FACE — Пути неисповедимы
+  ('Юморист', 180,
+   (SELECT id FROM albums WHERE title = 'Пути неисповедимы' AND artist_id = (SELECT id FROM artists WHERE name = 'FACE'))),
+  ('Спасательный круг', 190,
+   (SELECT id FROM albums WHERE title = 'Пути неисповедимы' AND artist_id = (SELECT id FROM artists WHERE name = 'FACE')));
+
+-- ======================================================================
+-- Album-Genres (все, через имена)
+-- ======================================================================
+INSERT INTO album_genres (album_id, genre_id) VALUES
+  -- Michael Jackson
+  ((SELECT id FROM albums WHERE title = 'Thriller' AND artist_id = (SELECT id FROM artists WHERE name = 'Michael Jackson')),
+   (SELECT id FROM genres WHERE name = 'Pop')),
+  ((SELECT id FROM albums WHERE title = 'Bad' AND artist_id = (SELECT id FROM artists WHERE name = 'Michael Jackson')),
+   (SELECT id FROM genres WHERE name = 'Pop')),
+
+  -- AC/DC
+  ((SELECT id FROM albums WHERE title = 'Back in Black' AND artist_id = (SELECT id FROM artists WHERE name = 'AC/DC')),
+   (SELECT id FROM genres WHERE name = 'Hard Rock')),
+  ((SELECT id FROM albums WHERE title = 'Highway to Hell' AND artist_id = (SELECT id FROM artists WHERE name = 'AC/DC')),
+   (SELECT id FROM genres WHERE name = 'Hard Rock')),
+
+  -- Pink Floyd
+  ((SELECT id FROM albums WHERE title = 'The Dark Side of the Moon' AND artist_id = (SELECT id FROM artists WHERE name = 'Pink Floyd')),
+   (SELECT id FROM genres WHERE name = 'Rock')),
+  ((SELECT id FROM albums WHERE title = 'The Dark Side of the Moon' AND artist_id = (SELECT id FROM artists WHERE name = 'Pink Floyd')),
+   (SELECT id FROM genres WHERE name = 'Progressive Rock')),
+  ((SELECT id FROM albums WHERE title = 'The Wall' AND artist_id = (SELECT id FROM artists WHERE name = 'Pink Floyd')),
+   (SELECT id FROM genres WHERE name = 'Rock')),
+
+  -- Queen
+  ((SELECT id FROM albums WHERE title = 'A Night at the Opera' AND artist_id = (SELECT id FROM artists WHERE name = 'Queen')),
+   (SELECT id FROM genres WHERE name = 'Rock')),
+  ((SELECT id FROM albums WHERE title = 'Innuendo' AND artist_id = (SELECT id FROM artists WHERE name = 'Queen')),
+   (SELECT id FROM genres WHERE name = 'Rock')),
+
+  -- Metallica
+  ((SELECT id FROM albums WHERE title = 'Master of Puppets' AND artist_id = (SELECT id FROM artists WHERE name = 'Metallica')),
+   (SELECT id FROM genres WHERE name = 'Metal')),
+  ((SELECT id FROM albums WHERE title = 'Ride the Lightning' AND artist_id = (SELECT id FROM artists WHERE name = 'Metallica')),
+   (SELECT id FROM genres WHERE name = 'Metal')),
+
+  -- Кино / ДДТ / Ленинград
+  ((SELECT id FROM albums WHERE title = 'Группа крови' AND artist_id = (SELECT id FROM artists WHERE name = 'Кино')),
+   (SELECT id FROM genres WHERE name = 'Русский рок')),
+  ((SELECT id FROM albums WHERE title = 'Звезда по имени Солнце' AND artist_id = (SELECT id FROM artists WHERE name = 'Кино')),
+   (SELECT id FROM genres WHERE name = 'Русский рок')),
+  ((SELECT id FROM albums WHERE title = 'Это всё...' AND artist_id = (SELECT id FROM artists WHERE name = 'ДДТ')),
+   (SELECT id FROM genres WHERE name = 'Русский рок')),
+  ((SELECT id FROM albums WHERE title = 'Актриса весна' AND artist_id = (SELECT id FROM artists WHERE name = 'ДДТ')),
+   (SELECT id FROM genres WHERE name = 'Русский рок')),
+  ((SELECT id FROM albums WHERE title = 'Альбом для друзей' AND artist_id = (SELECT id FROM artists WHERE name = 'Ленинград')),
+   (SELECT id FROM genres WHERE name = 'Панк-рок')),
+  ((SELECT id FROM albums WHERE title = 'Пираты XXI века' AND artist_id = (SELECT id FROM artists WHERE name = 'Ленинград')),
+   (SELECT id FROM genres WHERE name = 'Панк-рок')),
+
+  -- MORGENSHTERN / Скриптонит / FACE
+  ((SELECT id FROM albums WHERE title = 'Legendary Dust' AND artist_id = (SELECT id FROM artists WHERE name = 'MORGENSHTERN')),
+   (SELECT id FROM genres WHERE name = 'Рэп')),
+  ((SELECT id FROM albums WHERE title = 'Last One' AND artist_id = (SELECT id FROM artists WHERE name = 'MORGENSHTERN')),
+   (SELECT id FROM genres WHERE name = 'Рэп')),
+  ((SELECT id FROM albums WHERE title = 'Дом с нормальными явлениями' AND artist_id = (SELECT id FROM artists WHERE name = 'Скриптонит')),
+   (SELECT id FROM genres WHERE name = 'Хип-хоп')),
+  ((SELECT id FROM albums WHERE title = 'Пути неисповедимы' AND artist_id = (SELECT id FROM artists WHERE name = 'FACE')),
+   (SELECT id FROM genres WHERE name = 'Хип-хоп'));
+
+-- ======================================================================
+-- Users
+-- ======================================================================
+INSERT INTO users (name) VALUES
+  ('Alice'),
+  ('Bob'),
+  ('Charlie'),
+  ('Diana');
+
+-- ======================================================================
+-- User-Tracks (user_tracks) с привязкой через имена
+-- ======================================================================
+INSERT INTO user_tracks (user_id, track_id) VALUES
+  -- Alice любит поп и рок
+  ((SELECT id FROM users WHERE name = 'Alice'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Wanna Be Startin'' Somethin''' AND a.title = 'Thriller' AND ar.name = 'Michael Jackson')),
+  ((SELECT id FROM users WHERE name = 'Alice'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Thriller' AND a.title = 'Thriller' AND ar.name = 'Michael Jackson')),
+  ((SELECT id FROM users WHERE name = 'Alice'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Smooth Criminal' AND a.title = 'Bad' AND ar.name = 'Michael Jackson')),
+  ((SELECT id FROM users WHERE name = 'Alice'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Bohemian Rhapsody' AND a.title = 'A Night at the Opera' AND ar.name = 'Queen')),
+
+  -- Bob любит AC/DC и Metallica
+  ((SELECT id FROM users WHERE name = 'Bob'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Hells Bells' AND a.title = 'Back in Black' AND ar.name = 'AC/DC')),
+  ((SELECT id FROM users WHERE name = 'Bob'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Back in Black' AND a.title = 'Back in Black' AND ar.name = 'AC/DC')),
+  ((SELECT id FROM users WHERE name = 'Bob'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Battery' AND a.title = 'Master of Puppets' AND ar.name = 'Metallica')),
+  ((SELECT id FROM users WHERE name = 'Bob'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Master of Puppets' AND a.title = 'Master of Puppets' AND ar.name = 'Metallica')),
+
+  -- Charlie любит Pink Floyd
+  ((SELECT id FROM users WHERE name = 'Charlie'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Speak to Me' AND a.title = 'The Dark Side of the Moon' AND ar.name = 'Pink Floyd')),
+  ((SELECT id FROM users WHERE name = 'Charlie'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Breathe' AND a.title = 'The Dark Side of the Moon' AND ar.name = 'Pink Floyd')),
+  ((SELECT id FROM users WHERE name = 'Charlie'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Time' AND a.title = 'The Dark Side of the Moon' AND ar.name = 'Pink Floyd')),
+  ((SELECT id FROM users WHERE name = 'Charlie'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Comfortably Numb' AND a.title = 'The Wall' AND ar.name = 'Pink Floyd')),
+
+  -- Diana слушает всё понемногу
+  ((SELECT id FROM users WHERE name = 'Diana'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Beat It' AND a.title = 'Thriller' AND ar.name = 'Michael Jackson')),
+  ((SELECT id FROM users WHERE name = 'Diana'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Highway to Hell' AND a.title = 'Highway to Hell' AND ar.name = 'AC/DC')),
+  ((SELECT id FROM users WHERE name = 'Diana'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Love of My Life' AND a.title = 'A Night at the Opera' AND ar.name = 'Queen')),
+  ((SELECT id FROM users WHERE name = 'Diana'),
+   (SELECT t.id FROM tracks t
+      JOIN albums a ON t.album_id = a.id
+      JOIN artists ar ON a.artist_id = ar.id
+    WHERE t.title = 'Fade to Black' AND a.title = 'Ride the Lightning' AND ar.name = 'Metallica'));
+
+
+
+

@@ -1,0 +1,15 @@
+package by.aleksandr.music.dto.request;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class TrackRequest {
+
+    private String title;
+    private Integer durationSeconds;
+    private Long albumId;
+}

@@ -8,8 +8,18 @@ spring:
 
     jpa:
         hibernate:
-            ddl-auto: create
-
+        # validate проверяет соответствие сущностей таблицам БД при запуске
+            ddl-auto: validate
+      # Включает вывод SQL-запросов в консоль
+        show-sql: true
+        properties:
+          hibernate:
+          # Делает SQL в консоли читаемым (разбивает на строки)
+          format_sql: true
+          # Подсвечивает ключевые слова SQL
+          highlight_sql: true
+          # Позволяет Hibernate корректно определять типы при использовании Postgres
+          dialect: org.hibernate.dialect.PostgreSQLDialect
     datasource:
         url: jdbc:postgresql://localhost:5432/musicCatalog
         username: postgres
