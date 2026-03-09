@@ -1,9 +1,12 @@
 HELP.md
 config/
 target/
+/docs/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+/music_data_postgres.txt
+/er-diagram.txt
 
 ### STS ###
 .apt_generated
