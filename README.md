@@ -25,7 +25,7 @@
 - VK Musiq
 - Яндекс Музыка
 
-<img width="667" height="766" alt="image" src="https://github.com/user-attachments/assets/a23efb1a-124c-4664-a8fc-37ca67759915" />
+<img width="1303" height="436" alt="image" src="https://github.com/user-attachments/assets/87936fcb-2132-42c5-867c-1550552319a6" />
 
 
 [Сонар](https://sonarcloud.io/project/overview?id=kykyy67_musiq)
