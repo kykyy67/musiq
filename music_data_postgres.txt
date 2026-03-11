@@ -1,0 +1,88 @@
+-- Очистка (ОСТОРОЖНО)
+TRUNCATE TABLE user_tracks, album_genres, album_artists, tracks, albums, users, genres, artists RESTART IDENTITY CASCADE;
+
+-- ======================================================================
+-- Artists
+-- ======================================================================
+INSERT INTO artists (name) VALUES
+  ('Michael Jackson'), ('AC/DC'), ('Pink Floyd'), ('Queen'), ('Metallica'),
+  ('Кино'), ('ДДТ'), ('Ленинград'), ('MORGENSHTERN'), ('Скриптонит'), ('FACE');
+
+-- ======================================================================
+-- Genres
+-- ======================================================================
+INSERT INTO genres (name) VALUES
+  ('Pop'), ('Rock'), ('Progressive Rock'), ('Metal'), ('Hard Rock'),
+  ('Русский рок'), ('Панк-рок'), ('Рэп'), ('Хип-хоп');
+
+-- ======================================================================
+-- Albums (БЕЗ artist_id, теперь это отдельная таблица)
+-- ======================================================================
+INSERT INTO albums (title, release_year) VALUES
+  ('Thriller', 1982), ('Bad', 1987),
+  ('Back in Black', 1980), ('Highway to Hell', 1979),
+  ('The Dark Side of the Moon', 1973), ('The Wall', 1979),
+  ('A Night at the Opera', 1975), ('Innuendo', 1991),
+  ('Master of Puppets', 1986), ('Ride the Lightning', 1984),
+  ('Группа крови', 1988), ('Звезда по имени Солнце', 1989),
+  ('Это всё...', 1985), ('Актриса весна', 1992),
+  ('Альбом для друзей', 1999), ('Пираты XXI века', 2002),
+  ('Legendary Dust', 2020), ('Last One', 2021),
+  ('Дом с нормальными явлениями', 2015),
+  ('Пути неисповедимы', 2017);
+
+-- ======================================================================
+-- album_artists (НОВАЯ ТАБЛИЦА СВЯЗЕЙ)
+-- ======================================================================
+INSERT INTO album_artists (album_id, artist_id) VALUES
+  ((SELECT id FROM albums WHERE title = 'Thriller'), (SELECT id FROM artists WHERE name = 'Michael Jackson')),
+  ((SELECT id FROM albums WHERE title = 'Bad'), (SELECT id FROM artists WHERE name = 'Michael Jackson')),
+  ((SELECT id FROM albums WHERE title = 'Back in Black'), (SELECT id FROM artists WHERE name = 'AC/DC')),
+  ((SELECT id FROM albums WHERE title = 'Highway to Hell'), (SELECT id FROM artists WHERE name = 'AC/DC')),
+  ((SELECT id FROM albums WHERE title = 'The Dark Side of the Moon'), (SELECT id FROM artists WHERE name = 'Pink Floyd')),
+  ((SELECT id FROM albums WHERE title = 'The Wall'), (SELECT id FROM artists WHERE name = 'Pink Floyd')),
+  ((SELECT id FROM albums WHERE title = 'A Night at the Opera'), (SELECT id FROM artists WHERE name = 'Queen')),
+  ((SELECT id FROM albums WHERE title = 'Innuendo'), (SELECT id FROM artists WHERE name = 'Queen')),
+  ((SELECT id FROM albums WHERE title = 'Master of Puppets'), (SELECT id FROM artists WHERE name = 'Metallica')),
+  ((SELECT id FROM albums WHERE title = 'Ride the Lightning'), (SELECT id FROM artists WHERE name = 'Metallica')),
+  ((SELECT id FROM albums WHERE title = 'Группа крови'), (SELECT id FROM artists WHERE name = 'Кино')),
+  ((SELECT id FROM albums WHERE title = 'Звезда по имени Солнце'), (SELECT id FROM artists WHERE name = 'Кино')),
+  ((SELECT id FROM albums WHERE title = 'Это всё...'), (SELECT id FROM artists WHERE name = 'ДДТ')),
+  ((SELECT id FROM albums WHERE title = 'Актриса весна'), (SELECT id FROM artists WHERE name = 'ДДТ')),
+  ((SELECT id FROM albums WHERE title = 'Альбом для друзей'), (SELECT id FROM artists WHERE name = 'Ленинград')),
+  ((SELECT id FROM albums WHERE title = 'Пираты XXI века'), (SELECT id FROM artists WHERE name = 'Ленинград')),
+  ((SELECT id FROM albums WHERE title = 'Legendary Dust'), (SELECT id FROM artists WHERE name = 'MORGENSHTERN')),
+  ((SELECT id FROM albums WHERE title = 'Last One'), (SELECT id FROM artists WHERE name = 'MORGENSHTERN')),
+  ((SELECT id FROM albums WHERE title = 'Дом с нормальными явлениями'), (SELECT id FROM artists WHERE name = 'Скриптонит')),
+  ((SELECT id FROM albums WHERE title = 'Пути неисповедимы'), (SELECT id FROM artists WHERE name = 'FACE'));
+
+-- ======================================================================
+-- Tracks (Упрощенные подзапросы, так как у альбома теперь нет artist_id)
+-- ======================================================================
+INSERT INTO tracks (title, duration_seconds, album_id) VALUES
+  ('Thriller', 357, (SELECT id FROM albums WHERE title = 'Thriller')),
+  ('Beat It', 258, (SELECT id FROM albums WHERE title = 'Thriller')),
+  ('Back in Black', 255, (SELECT id FROM albums WHERE title = 'Back in Black')),
+  ('Another Brick in the Wall, Pt. 2', 240, (SELECT id FROM albums WHERE title = 'The Wall')),
+  ('Bohemian Rhapsody', 354, (SELECT id FROM albums WHERE title = 'A Night at the Opera')),
+  ('Master of Puppets', 515, (SELECT id FROM albums WHERE title = 'Master of Puppets')),
+  ('Группа крови', 260, (SELECT id FROM albums WHERE title = 'Группа крови')),
+  ('WWW', 190, (SELECT id FROM albums WHERE title = 'Пираты XXI века')),
+  ('Cadillac', 160, (SELECT id FROM albums WHERE title = 'Legendary Dust')),
+  ('Притон', 200, (SELECT id FROM albums WHERE title = 'Дом с нормальными явлениями'));
+
+-- ======================================================================
+-- Album-Genres (Связи через новую схему)
+-- ======================================================================
+INSERT INTO album_genres (album_id, genre_id) VALUES
+  ((SELECT id FROM albums WHERE title = 'Thriller'), (SELECT id FROM genres WHERE name = 'Pop')),
+  ((SELECT id FROM albums WHERE title = 'Back in Black'), (SELECT id FROM genres WHERE name = 'Hard Rock')),
+  ((SELECT id FROM albums WHERE title = 'The Wall'), (SELECT id FROM genres WHERE name = 'Rock')),
+  ((SELECT id FROM albums WHERE title = 'Группа крови'), (SELECT id FROM genres WHERE name = 'Русский рок')),
+  ((SELECT id FROM albums WHERE title = 'Legendary Dust'), (SELECT id FROM genres WHERE name = 'Рэп'));
+
+-- ======================================================================
+-- Users
+-- ======================================================================
+INSERT INTO users (name) VALUES
+  ('Sanya Skybilov'), ('Andrei Ivashnev'), ('user1337'), ('user228');

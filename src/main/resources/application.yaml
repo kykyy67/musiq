@@ -9,7 +9,7 @@ spring:
     jpa:
         hibernate:
         # validate проверяет соответствие сущностей таблицам БД при запуске
-            ddl-auto: validate
+            ddl-auto: update
       # Включает вывод SQL-запросов в консоль
         show-sql: true
         properties:

@@ -12,6 +12,6 @@ public class AlbumRequest {
 
     private String title;
     private int releaseYear;
-    private Long artistId;
+    private List<Long> artistIds; // Изменено с Long на List<Long>
     private List<Long> genreIds;
 }

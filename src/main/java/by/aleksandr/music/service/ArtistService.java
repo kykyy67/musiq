@@ -9,6 +9,7 @@ import by.aleksandr.music.repository.ArtistRepository;
 import by.aleksandr.music.repository.TrackRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,13 +77,15 @@ public class ArtistService {
     }
 
     private Artist createArtist(ArtistWithAlbumAndTracksRequest request, boolean simulateFailureAfterAlbum) {
+        // 1. Создаем и сохраняем артиста
         Artist artist = Artist.builder().name(request.getArtistName()).build();
         artist = artistRepository.save(artist);
 
+        // 2. Создаем альбом и добавляем артиста в коллекцию Set<Artist>
         Album album = Album.builder()
                 .title(request.getAlbumTitle())
                 .releaseYear(request.getReleaseYear())
-                .artist(artist)
+                .artists(Set.of(artist)) // Используем коллекцию вместо одиночного поля
                 .build();
         album = albumRepository.save(album);
 
@@ -90,6 +93,7 @@ public class ArtistService {
             throw new IllegalArgumentException("ОШибочка!-_-");
         }
 
+        // 3. Создаем треки
         if (request.getTracks() != null) {
             for (ArtistWithAlbumAndTracksRequest.TrackItem item : request.getTracks()) {
                 Track track = Track.builder()
@@ -103,4 +107,3 @@ public class ArtistService {
         return artist;
     }
 }
-

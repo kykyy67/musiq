@@ -9,10 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AlbumResponse {
+
     private Long id;
     private String title;
     private int releaseYear;
-    private Long artistId;
+    private List<Long> artistIds; // Изменено на List
     private List<Long> genreIds;
     private List<TrackResponse> tracks;
 }

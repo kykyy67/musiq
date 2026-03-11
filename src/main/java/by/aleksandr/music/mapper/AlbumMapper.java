@@ -15,7 +15,9 @@ public final class AlbumMapper {
             return null;
         }
 
-        Long artistId = (album.getArtist() != null) ? album.getArtist().getId() : null;
+        List<Long> artistIds = (album.getArtists() == null)
+                ? List.of()
+                : album.getArtists().stream().map(a -> a.getId()).toList();
 
         List<Long> genreIds = (album.getGenres() == null)
                 ? List.of()
@@ -29,7 +31,7 @@ public final class AlbumMapper {
                         t.getTitle(),
                         t.getDurationSeconds(),
                         album.getId(),
-                        artistId
+                        artistIds.isEmpty() ? null : artistIds.get(0) // Для трека берем первого артиста или null
                 ))
                 .toList();
 
@@ -37,7 +39,7 @@ public final class AlbumMapper {
                 album.getId(),
                 album.getTitle(),
                 album.getReleaseYear(),
-                artistId,
+                artistIds,
                 genreIds,
                 trackResponses);
     }
@@ -46,8 +48,6 @@ public final class AlbumMapper {
         if (albums == null) {
             return List.of();
         }
-        return albums.stream()
-                .map(AlbumMapper::toResponse)
-                .toList();
+        return albums.stream().map(AlbumMapper::toResponse).toList();
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true) // Обеспечивает наличие сессии Hibernate для всех GET методов
 public class AlbumService {
 
     private final AlbumRepository albumRepository;
@@ -34,30 +35,24 @@ public class AlbumService {
         return albumRepository.findByTitleContainingIgnoreCase(title);
     }
 
-    public List<Album> getAllAlbumsWithArtistAndGenres() {
-        return albumRepository.findAll();
-    }
-
     public List<Album> getAlbumsByTitleWithArtistAndGenres(String title) {
         return getAlbumsByTitle(title);
     }
 
     public Optional<Album> getAlbumById(Long id) {
-        return albumRepository.findById(id);
+        // ИСПРАВЛЕНО: используем метод с EntityGraph вместо стандартного findById
+        return albumRepository.findWithEntityGraphById(id);
     }
 
     @Transactional
     public Optional<Album> create(AlbumRequest request) {
-        Artist artist = request.getArtistId() != null
-                ? artistRepository.findById(request.getArtistId()).orElse(null)
-                : null;
-
+        Set<Artist> artists = resolveArtists(request.getArtistIds());
         Set<Genre> genres = resolveGenres(request.getGenreIds());
 
         Album album = Album.builder()
                 .title(request.getTitle())
                 .releaseYear(request.getReleaseYear())
-                .artist(artist)
+                .artists(artists)
                 .genres(genres)
                 .build();
 
@@ -66,21 +61,14 @@ public class AlbumService {
 
     @Transactional
     public Optional<Album> update(Long id, AlbumRequest request) {
-        return albumRepository.findById(id)
+        return albumRepository.findWithEntityGraphById(id) // Тоже используем граф здесь
                 .map(existing -> {
                     existing.setTitle(request.getTitle());
                     existing.setReleaseYear(request.getReleaseYear());
-
-                    if (request.getArtistId() != null) {
-                        artistRepository.findById(request.getArtistId()).ifPresent(existing::setArtist);
-                    } else {
-                        existing.setArtist(null);
-                    }
-
-                    // Обновляем связи с жанрами
+                    existing.getArtists().clear();
+                    existing.getArtists().addAll(resolveArtists(request.getArtistIds()));
                     existing.getGenres().clear();
                     existing.getGenres().addAll(resolveGenres(request.getGenreIds()));
-
                     return albumRepository.save(existing);
                 });
     }
@@ -89,20 +77,21 @@ public class AlbumService {
     public boolean deleteById(Long id) {
         return albumRepository.findById(id)
                 .map(album -> {
-                    album.getTracks().forEach(track -> {
-                        track.getUsers().forEach(user -> user.getTracks().remove(track));
-                    });
-
+                    album.getTracks().forEach(track ->
+                            track.getUsers().forEach(user -> user.getTracks().remove(track)));
                     albumRepository.delete(album);
                     return true;
                 })
                 .orElse(false);
     }
 
+    private Set<Artist> resolveArtists(List<Long> artistIds) {
+        if (artistIds == null || artistIds.isEmpty()) return new HashSet<>();
+        return new HashSet<>(artistRepository.findAllById(artistIds));
+    }
+
     private Set<Genre> resolveGenres(List<Long> genreIds) {
-        if (genreIds == null || genreIds.isEmpty()) {
-            return new HashSet<>();
-        }
+        if (genreIds == null || genreIds.isEmpty()) return new HashSet<>();
         return new HashSet<>(genreRepository.findAllById(genreIds));
     }
 }
