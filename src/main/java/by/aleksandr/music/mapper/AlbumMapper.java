@@ -27,7 +27,11 @@ public final class AlbumMapper {
                 ? List.of()
                 : album.getTracks().stream()
                 .map(t -> {
-                    Long trackArtistId = artistIds.isEmpty() ? null : artistIds.get(0);
+                    Long trackArtistId = null;
+                    if (!artistIds.isEmpty()) {
+                        trackArtistId = artistIds.get(0);
+                    }
+
                     return new TrackResponse(
                             t.getId(),
                             t.getTitle(),
