@@ -67,7 +67,7 @@ public class ArtistController {
     @PostMapping("/composite/without-transaction")
     public ResponseEntity<String> saveCompositeWithoutTransaction(
             @RequestBody ArtistWithAlbumAndTracksRequest request,
-            @RequestParam(name = "fail", defaultValue = "false") boolean fail) { // Добавили name = "fail"
+            @RequestParam(name = "fail", defaultValue = "false") boolean fail) {
         artistService.saveArtistWithAlbumAndTracksWithoutTransaction(request, fail);
         return ResponseEntity.ok("Сохранено без транзакции.");
     }
@@ -75,7 +75,7 @@ public class ArtistController {
     @PostMapping("/composite/with-transaction")
     public ResponseEntity<String> saveCompositeWithTransaction(
             @RequestBody ArtistWithAlbumAndTracksRequest request,
-            @RequestParam(name = "fail", defaultValue = "false") boolean fail) { // Добавили name = "fail"
+            @RequestParam(name = "fail", defaultValue = "false") boolean fail) {
         artistService.saveArtistWithAlbumAndTracksWithTransaction(request, fail);
         return ResponseEntity.ok("Сохранено с транзакцией.");
     }

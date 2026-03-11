@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true) // Обеспечивает наличие сессии Hibernate для всех GET методов
+@Transactional(readOnly = true)
 public class AlbumService {
 
     private final AlbumRepository albumRepository;
@@ -40,7 +40,6 @@ public class AlbumService {
     }
 
     public Optional<Album> getAlbumById(Long id) {
-        // ИСПРАВЛЕНО: используем метод с EntityGraph вместо стандартного findById
         return albumRepository.findWithEntityGraphById(id);
     }
 
@@ -61,7 +60,7 @@ public class AlbumService {
 
     @Transactional
     public Optional<Album> update(Long id, AlbumRequest request) {
-        return albumRepository.findWithEntityGraphById(id) // Тоже используем граф здесь
+        return albumRepository.findWithEntityGraphById(id)
                 .map(existing -> {
                     existing.setTitle(request.getTitle());
                     existing.setReleaseYear(request.getReleaseYear());

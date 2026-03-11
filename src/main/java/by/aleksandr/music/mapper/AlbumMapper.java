@@ -26,13 +26,16 @@ public final class AlbumMapper {
         List<TrackResponse> trackResponses = (album.getTracks() == null)
                 ? List.of()
                 : album.getTracks().stream()
-                .map(t -> new TrackResponse(
-                        t.getId(),
-                        t.getTitle(),
-                        t.getDurationSeconds(),
-                        album.getId(),
-                        artistIds.isEmpty() ? null : artistIds.get(0) // Для трека берем первого артиста или null
-                ))
+                .map(t -> {
+                    Long trackArtistId = artistIds.isEmpty() ? null : artistIds.get(0);
+                    return new TrackResponse(
+                            t.getId(),
+                            t.getTitle(),
+                            t.getDurationSeconds(),
+                            album.getId(),
+                            trackArtistId
+                    );
+                })
                 .toList();
 
         return new AlbumResponse(

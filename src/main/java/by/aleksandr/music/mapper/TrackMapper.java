@@ -22,9 +22,7 @@ public final class TrackMapper {
         if (track.getAlbum() != null) {
             response.setAlbumId(track.getAlbum().getId());
 
-            // Важно: проверяем именно коллекцию getArtists()
             if (track.getAlbum().getArtists() != null && !track.getAlbum().getArtists().isEmpty()) {
-                // Берем ID первого артиста из сета
                 Long firstArtistId = track.getAlbum().getArtists().iterator().next().getId();
                 response.setArtistId(firstArtistId);
             }

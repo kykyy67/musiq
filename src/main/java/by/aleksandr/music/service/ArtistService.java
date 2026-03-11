@@ -77,15 +77,13 @@ public class ArtistService {
     }
 
     private Artist createArtist(ArtistWithAlbumAndTracksRequest request, boolean simulateFailureAfterAlbum) {
-        // 1. Создаем и сохраняем артиста
         Artist artist = Artist.builder().name(request.getArtistName()).build();
         artist = artistRepository.save(artist);
 
-        // 2. Создаем альбом и добавляем артиста в коллекцию Set<Artist>
         Album album = Album.builder()
                 .title(request.getAlbumTitle())
                 .releaseYear(request.getReleaseYear())
-                .artists(Set.of(artist)) // Используем коллекцию вместо одиночного поля
+                .artists(Set.of(artist))
                 .build();
         album = albumRepository.save(album);
 
@@ -93,7 +91,6 @@ public class ArtistService {
             throw new IllegalArgumentException("ОШибочка!-_-");
         }
 
-        // 3. Создаем треки
         if (request.getTracks() != null) {
             for (ArtistWithAlbumAndTracksRequest.TrackItem item : request.getTracks()) {
                 Track track = Track.builder()
