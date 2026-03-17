@@ -1,5 +1,6 @@
 package by.aleksandr.music.service;
 
+import by.aleksandr.music.cache.AlbumSearchCache;
 import by.aleksandr.music.entity.Genre;
 import by.aleksandr.music.repository.GenreRepository;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class GenreService {
 
     private final GenreRepository genreRepository;
+    private final AlbumSearchCache albumSearchCache;
 
     public List<Genre> findAll() {
         return genreRepository.findAll();
@@ -31,7 +33,9 @@ public class GenreService {
 
     @Transactional
     public Genre create(Genre genre) {
-        return genreRepository.save(genre);
+        Genre saved = genreRepository.save(genre);
+        albumSearchCache.invalidateAll();
+        return saved;
     }
 
     @Transactional
@@ -39,7 +43,9 @@ public class GenreService {
         return genreRepository.findById(id)
                 .map(existing -> {
                     existing.setName(genre.getName());
-                    return genreRepository.save(existing);
+                    Genre saved = genreRepository.save(existing);
+                    albumSearchCache.invalidateAll();
+                    return saved;
                 });
     }
 
@@ -47,6 +53,7 @@ public class GenreService {
     public boolean deleteById(Long id) {
         if (genreRepository.existsById(id)) {
             genreRepository.deleteById(id);
+            albumSearchCache.invalidateAll();
             return true;
         }
         return false;

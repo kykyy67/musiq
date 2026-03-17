@@ -1,5 +1,6 @@
 package by.aleksandr.music.service;
 
+import by.aleksandr.music.cache.AlbumSearchCache;
 import by.aleksandr.music.entity.Album;
 import by.aleksandr.music.entity.Track;
 import by.aleksandr.music.repository.AlbumRepository;
@@ -16,6 +17,7 @@ public class TrackService {
 
     private final TrackRepository trackRepository;
     private final AlbumRepository albumRepository;
+    private final AlbumSearchCache albumSearchCache;
 
     public List<Track> findAll() {
         return trackRepository.findAll();
@@ -43,7 +45,9 @@ public class TrackService {
                 .durationSeconds(durationSeconds != null ? durationSeconds : 0)
                 .album(albumOpt.get())
                 .build();
-        return Optional.of(trackRepository.save(track));
+        Optional<Track> saved = Optional.of(trackRepository.save(track));
+        albumSearchCache.invalidateAll();
+        return saved;
     }
 
     @Transactional
@@ -59,7 +63,9 @@ public class TrackService {
                     if (albumId != null) {
                         albumRepository.findById(albumId).ifPresent(existing::setAlbum);
                     }
-                    return trackRepository.save(existing);
+                    Track saved = trackRepository.save(existing);
+                    albumSearchCache.invalidateAll();
+                    return saved;
                 });
     }
 
@@ -69,6 +75,7 @@ public class TrackService {
                 .map(t -> {
                     t.getUsers().forEach(user -> user.getTracks().remove(t));
                     trackRepository.delete(t);
+                    albumSearchCache.invalidateAll();
                     return true;
                 })
                 .orElse(false);

@@ -2,10 +2,12 @@ package by.aleksandr.music.controller;
 
 import by.aleksandr.music.dto.request.AlbumRequest;
 import by.aleksandr.music.dto.response.AlbumResponse;
+import by.aleksandr.music.dto.response.PagedResponse;
 import by.aleksandr.music.mapper.AlbumMapper;
 import by.aleksandr.music.service.AlbumService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,6 +31,15 @@ public class AlbumController {
     public List<AlbumResponse> getAlbums(
             @RequestParam(name = "title", required = false) String title) {
         return AlbumMapper.toResponseList(albumService.getAlbumsByTitleWithArtistAndGenres(title));
+    }
+
+    @GetMapping("/search")
+    public PagedResponse<AlbumResponse> search(
+            @RequestParam(required = false) String genreName,
+            @RequestParam(required = false) String trackTitle,
+            @RequestParam(defaultValue = "false") boolean nativeQuery,
+            Pageable pageable) {
+        return albumService.searchAlbumsByGenreAndTrack(genreName, trackTitle, nativeQuery, pageable);
     }
 
     @GetMapping("/{id}")

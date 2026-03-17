@@ -18,7 +18,7 @@ public class Exception {
                 .body(Map.of(
                         "status", 409,
                         "error", "Conflict",
-                        "message", "неа!"
+                        "message", "неа, много связей)"
                 ));
     }
 }

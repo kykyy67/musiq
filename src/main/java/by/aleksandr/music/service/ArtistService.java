@@ -1,5 +1,6 @@
 package by.aleksandr.music.service;
 
+import by.aleksandr.music.cache.AlbumSearchCache;
 import by.aleksandr.music.dto.request.ArtistWithAlbumAndTracksRequest;
 import by.aleksandr.music.entity.Album;
 import by.aleksandr.music.entity.Artist;
@@ -21,6 +22,7 @@ public class ArtistService {
     private final ArtistRepository artistRepository;
     private final AlbumRepository albumRepository;
     private final TrackRepository trackRepository;
+    private final AlbumSearchCache albumSearchCache;
 
     public List<Artist> findAll() {
         return artistRepository.findAll();
@@ -39,7 +41,9 @@ public class ArtistService {
 
     @Transactional
     public Artist create(Artist artist) {
-        return artistRepository.save(artist);
+        Artist saved = artistRepository.save(artist);
+        albumSearchCache.invalidateAll();
+        return saved;
     }
 
     @Transactional
@@ -47,7 +51,9 @@ public class ArtistService {
         return artistRepository.findById(id)
                 .map(existing -> {
                     existing.setName(artist.getName());
-                    return artistRepository.save(existing);
+                    Artist saved = artistRepository.save(existing);
+                    albumSearchCache.invalidateAll();
+                    return saved;
                 });
     }
 
@@ -56,6 +62,7 @@ public class ArtistService {
         return artistRepository.findById(id)
                 .map(a -> {
                     artistRepository.delete(a);
+                    albumSearchCache.invalidateAll();
                     return true;
                 })
                 .orElse(false);
@@ -101,6 +108,7 @@ public class ArtistService {
                 trackRepository.save(track);
             }
         }
+        albumSearchCache.invalidateAll();
         return artist;
     }
 }

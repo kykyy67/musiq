@@ -1,5 +1,6 @@
 package by.aleksandr.music.service;
 
+import by.aleksandr.music.cache.AlbumSearchCache;
 import by.aleksandr.music.entity.Track;
 import by.aleksandr.music.entity.User;
 import by.aleksandr.music.repository.TrackRepository;
@@ -17,6 +18,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final TrackRepository trackRepository;
+    private final AlbumSearchCache albumSearchCache;
 
     public List<User> findAll() {
         return userRepository.findAll();
@@ -39,7 +41,9 @@ public class UserService {
                 .name(name)
                 .tracks(resolveTracks(trackIds))
                 .build();
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+        albumSearchCache.invalidateAll();
+        return saved;
     }
 
     @Transactional
@@ -53,7 +57,9 @@ public class UserService {
                         existing.getTracks().clear();
                         existing.getTracks().addAll(resolveTracks(trackIds));
                     }
-                    return userRepository.save(existing);
+                    User saved = userRepository.save(existing);
+                    albumSearchCache.invalidateAll();
+                    return saved;
                 });
     }
 
@@ -62,6 +68,7 @@ public class UserService {
         return userRepository.findById(id)
                 .map(u -> {
                     userRepository.delete(u);
+                    albumSearchCache.invalidateAll();
                     return true;
                 })
                 .orElse(false);

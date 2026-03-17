@@ -14,8 +14,13 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
-
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "albums")
@@ -46,7 +51,9 @@ public class Album {
     @Builder.Default
     private Set<Artist> artists = new HashSet<>();
 
-    @OneToMany(mappedBy = "album", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "album",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private Set<Track> tracks = new HashSet<>();
 
