@@ -3,9 +3,12 @@ package by.aleksandr.music.service;
 import by.aleksandr.music.cache.AlbumSearchCache;
 import by.aleksandr.music.entity.Track;
 import by.aleksandr.music.entity.User;
+import by.aleksandr.music.exception.BadRequestException;
+import by.aleksandr.music.exception.ResourceNotFoundException;
 import by.aleksandr.music.repository.TrackRepository;
 import by.aleksandr.music.repository.UserRepository;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -50,13 +53,9 @@ public class UserService {
     public Optional<User> update(Long id, String name, List<Long> trackIds) {
         return userRepository.findById(id)
                 .map(existing -> {
-                    if (name != null) {
-                        existing.setName(name);
-                    }
-                    if (trackIds != null) {
-                        existing.getTracks().clear();
-                        existing.getTracks().addAll(resolveTracks(trackIds));
-                    }
+                    existing.setName(name);
+                    existing.getTracks().clear();
+                    existing.getTracks().addAll(resolveTracks(trackIds));
                     User saved = userRepository.save(existing);
                     albumSearchCache.invalidateAll();
                     return saved;
@@ -64,23 +63,20 @@ public class UserService {
     }
 
     @Transactional
-    public boolean deleteById(Long id) {
-        return userRepository.findById(id)
-                .map(u -> {
-                    userRepository.delete(u);
-                    albumSearchCache.invalidateAll();
-                    return true;
-                })
-                .orElse(false);
+    public void deleteById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
+        userRepository.delete(user);
+        albumSearchCache.invalidateAll();
     }
 
     private List<Track> resolveTracks(List<Long> trackIds) {
         if (trackIds == null || trackIds.isEmpty()) {
             return new ArrayList<>();
         }
-        List<Track> tracks = new ArrayList<>();
-        for (Long trackId : trackIds) {
-            trackRepository.findById(trackId).ifPresent(tracks::add);
+        List<Track> tracks = new ArrayList<>(trackRepository.findAllById(trackIds));
+        if (tracks.size() != new HashSet<>(trackIds).size()) {
+            throw new BadRequestException("One or more track ids do not exist");
         }
         return tracks;
     }

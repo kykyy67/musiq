@@ -3,6 +3,7 @@ package by.aleksandr.music.service;
 import by.aleksandr.music.cache.AlbumSearchCache;
 import by.aleksandr.music.entity.Album;
 import by.aleksandr.music.entity.Track;
+import by.aleksandr.music.exception.ResourceNotFoundException;
 import by.aleksandr.music.repository.AlbumRepository;
 import by.aleksandr.music.repository.TrackRepository;
 import java.util.List;
@@ -35,49 +36,39 @@ public class TrackService {
     }
 
     @Transactional
-    public Optional<Track> create(String title, Integer durationSeconds, Long albumId) {
-        Optional<Album> albumOpt = albumRepository.findById(albumId);
-        if (albumOpt.isEmpty()) {
-            return Optional.empty();
-        }
+    public Track create(String title, Integer durationSeconds, Long albumId) {
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new ResourceNotFoundException("Album with id " + albumId + " not found"));
         Track track = Track.builder()
                 .title(title)
-                .durationSeconds(durationSeconds != null ? durationSeconds : 0)
-                .album(albumOpt.get())
+                .durationSeconds(durationSeconds)
+                .album(album)
                 .build();
-        Optional<Track> saved = Optional.of(trackRepository.save(track));
+        Track saved = trackRepository.save(track);
         albumSearchCache.invalidateAll();
         return saved;
     }
 
     @Transactional
-    public Optional<Track> update(Long id, String title, Integer durationSeconds, Long albumId) {
-        return trackRepository.findById(id)
-                .map(existing -> {
-                    if (title != null) {
-                        existing.setTitle(title);
-                    }
-                    if (durationSeconds != null) {
-                        existing.setDurationSeconds(durationSeconds);
-                    }
-                    if (albumId != null) {
-                        albumRepository.findById(albumId).ifPresent(existing::setAlbum);
-                    }
-                    Track saved = trackRepository.save(existing);
-                    albumSearchCache.invalidateAll();
-                    return saved;
-                });
+    public Track update(Long id, String title, Integer durationSeconds, Long albumId) {
+        Track existing = trackRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Track with id " + id + " not found"));
+        existing.setTitle(title);
+        existing.setDurationSeconds(durationSeconds);
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new ResourceNotFoundException("Album with id " + albumId + " not found"));
+        existing.setAlbum(album);
+        Track saved = trackRepository.save(existing);
+        albumSearchCache.invalidateAll();
+        return saved;
     }
 
     @Transactional
-    public boolean deleteById(Long id) {
-        return trackRepository.findById(id)
-                .map(t -> {
-                    t.getUsers().forEach(user -> user.getTracks().remove(t));
-                    trackRepository.delete(t);
-                    albumSearchCache.invalidateAll();
-                    return true;
-                })
-                .orElse(false);
+    public void deleteById(Long id) {
+        Track track = trackRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Track with id " + id + " not found"));
+        track.getUsers().forEach(user -> user.getTracks().remove(track));
+        trackRepository.delete(track);
+        albumSearchCache.invalidateAll();
     }
 }

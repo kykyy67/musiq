@@ -5,6 +5,8 @@ import by.aleksandr.music.dto.request.ArtistWithAlbumAndTracksRequest;
 import by.aleksandr.music.entity.Album;
 import by.aleksandr.music.entity.Artist;
 import by.aleksandr.music.entity.Track;
+import by.aleksandr.music.exception.BadRequestException;
+import by.aleksandr.music.exception.ResourceNotFoundException;
 import by.aleksandr.music.repository.AlbumRepository;
 import by.aleksandr.music.repository.ArtistRepository;
 import by.aleksandr.music.repository.TrackRepository;
@@ -58,20 +60,16 @@ public class ArtistService {
     }
 
     @Transactional
-    public boolean deleteById(Long id) {
-        return artistRepository.findById(id)
-                .map(a -> {
-                    artistRepository.delete(a);
-                    albumSearchCache.invalidateAll();
-                    return true;
-                })
-                .orElse(false);
+    public void deleteById(Long id) {
+        Artist artist = artistRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Artist with id " + id + " not found"));
+        artistRepository.delete(artist);
+        albumSearchCache.invalidateAll();
     }
 
     public void saveArtistWithAlbumAndTracksWithoutTransaction(
             ArtistWithAlbumAndTracksRequest request,
             boolean simulateFailureAfterAlbum) {
-
         createArtist(request, simulateFailureAfterAlbum);
     }
 
@@ -79,11 +77,12 @@ public class ArtistService {
     public void saveArtistWithAlbumAndTracksWithTransaction(
             ArtistWithAlbumAndTracksRequest request,
             boolean simulateFailureAfterAlbum) {
-
         createArtist(request, simulateFailureAfterAlbum);
     }
 
-    private Artist createArtist(ArtistWithAlbumAndTracksRequest request, boolean simulateFailureAfterAlbum) {
+    private Artist createArtist(
+            ArtistWithAlbumAndTracksRequest request,
+            boolean simulateFailureAfterAlbum) {
         Artist artist = Artist.builder().name(request.getArtistName()).build();
         artist = artistRepository.save(artist);
 
@@ -95,18 +94,16 @@ public class ArtistService {
         album = albumRepository.save(album);
 
         if (simulateFailureAfterAlbum) {
-            throw new IllegalArgumentException("ОШибочка!-_-");
+            throw new BadRequestException("Simulated composite save failure");
         }
 
-        if (request.getTracks() != null) {
-            for (ArtistWithAlbumAndTracksRequest.TrackItem item : request.getTracks()) {
-                Track track = Track.builder()
-                        .title(item.getTitle())
-                        .durationSeconds(item.getDurationSeconds() != null ? item.getDurationSeconds() : 0)
-                        .album(album)
-                        .build();
-                trackRepository.save(track);
-            }
+        for (ArtistWithAlbumAndTracksRequest.TrackItem item : request.getTracks()) {
+            Track track = Track.builder()
+                    .title(item.getTitle())
+                    .durationSeconds(item.getDurationSeconds())
+                    .album(album)
+                    .build();
+            trackRepository.save(track);
         }
         albumSearchCache.invalidateAll();
         return artist;

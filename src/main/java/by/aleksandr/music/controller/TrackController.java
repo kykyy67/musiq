@@ -2,12 +2,16 @@ package by.aleksandr.music.controller;
 
 import by.aleksandr.music.dto.request.TrackRequest;
 import by.aleksandr.music.dto.response.TrackResponse;
+import by.aleksandr.music.exception.ResourceNotFoundException;
 import by.aleksandr.music.mapper.TrackMapper;
 import by.aleksandr.music.service.TrackService;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
 @RestController
 @RequestMapping("/api/tracks")
 @RequiredArgsConstructor
@@ -25,49 +30,42 @@ public class TrackController {
 
     private final TrackService trackService;
 
+    @Operation(summary = "Get tracks")
     @GetMapping
     public List<TrackResponse> getAll(
             @RequestParam(name = "title", required = false) String title) {
         return TrackMapper.toResponseList(trackService.findByTitle(title));
     }
 
+    @Operation(summary = "Get track by id")
     @GetMapping("/{id}")
-    public ResponseEntity<TrackResponse> getById(@PathVariable Long id) {
+    public TrackResponse getById(@PathVariable Long id) {
         return trackService.findById(id)
                 .map(TrackMapper::toResponse)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ResourceNotFoundException("Track with id " + id + " not found"));
     }
 
+    @Operation(summary = "Create track")
     @PostMapping
-    public ResponseEntity<TrackResponse> create(@RequestBody TrackRequest request) {
-        return trackService.create(
-                request.getTitle(),
-                        request.getDurationSeconds(),
-                        request.getAlbumId())
-                .map(TrackMapper::toResponse)
-                .map(body -> ResponseEntity.status(HttpStatus.CREATED).body(body))
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+    public ResponseEntity<TrackResponse> create(@Valid @RequestBody TrackRequest request) {
+        TrackResponse response = TrackMapper.toResponse(
+                trackService.create(request.getTitle(), request.getDurationSeconds(), request.getAlbumId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Update track")
     @PutMapping("/{id}")
-    public ResponseEntity<TrackResponse> update(
+    public TrackResponse update(
             @PathVariable Long id,
-            @RequestBody TrackRequest request) {
-        return trackService.update(
-                id,
-                        request.getTitle(),
-                        request.getDurationSeconds(),
-                        request.getAlbumId())
-                .map(TrackMapper::toResponse)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+            @Valid @RequestBody TrackRequest request) {
+        return TrackMapper.toResponse(
+                trackService.update(id, request.getTitle(), request.getDurationSeconds(), request.getAlbumId()));
     }
 
+    @Operation(summary = "Delete track")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        return trackService.deleteById(id)
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.notFound().build();
+        trackService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

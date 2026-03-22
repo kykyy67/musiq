@@ -2,6 +2,7 @@ package by.aleksandr.music.service;
 
 import by.aleksandr.music.cache.AlbumSearchCache;
 import by.aleksandr.music.entity.Genre;
+import by.aleksandr.music.exception.ResourceNotFoundException;
 import by.aleksandr.music.repository.GenreRepository;
 import java.util.List;
 import java.util.Optional;
@@ -50,12 +51,11 @@ public class GenreService {
     }
 
     @Transactional
-    public boolean deleteById(Long id) {
-        if (genreRepository.existsById(id)) {
-            genreRepository.deleteById(id);
-            albumSearchCache.invalidateAll();
-            return true;
+    public void deleteById(Long id) {
+        if (!genreRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Genre with id " + id + " not found");
         }
-        return false;
+        genreRepository.deleteById(id);
+        albumSearchCache.invalidateAll();
     }
 }
