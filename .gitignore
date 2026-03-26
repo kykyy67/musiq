@@ -2,6 +2,7 @@ HELP.md
 config/
 target/
 logs/
+.m2repo/
 /docs/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
