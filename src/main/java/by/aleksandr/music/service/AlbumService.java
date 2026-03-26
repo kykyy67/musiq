@@ -13,9 +13,12 @@ import by.aleksandr.music.mapper.AlbumMapper;
 import by.aleksandr.music.repository.AlbumRepository;
 import by.aleksandr.music.repository.ArtistRepository;
 import by.aleksandr.music.repository.GenreRepository;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -70,12 +73,14 @@ public class AlbumService {
         String trackPatternLower = normalizeTrackPattern(trackTitle);
         String genreNameLower = normalize(genreName);
 
-        Page<Album> page = nativeQuery
-                ? albumRepository.searchAlbumsNative(genreNameLower, trackPatternLower, pageable)
-                : albumRepository.searchAlbumsJpql(genreNameLower, trackPatternLower, pageable);
+        Page<Long> page = nativeQuery
+                ? albumRepository.searchAlbumIdsNative(genreNameLower, trackPatternLower, pageable)
+                : albumRepository.searchAlbumIdsJpql(genreNameLower, trackPatternLower, pageable);
+
+        List<Album> albums = fetchAlbumsForPage(page.getContent());
 
         PagedResponse<AlbumResponse> result = new PagedResponse<>(
-                page.getContent().stream().map(AlbumMapper::toResponse).toList(),
+                albums.stream().map(AlbumMapper::toResponse).toList(),
                 page.getNumber(),
                 page.getSize(),
                 page.getTotalElements(),
@@ -118,7 +123,7 @@ public class AlbumService {
 
     @Transactional
     public void deleteById(Long id) {
-        Album album = albumRepository.findById(id)
+        Album album = albumRepository.findForDeleteById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Album with id " + id + " not found"));
         album.getTracks().forEach(track ->
                 track.getUsers().forEach(user -> user.getTracks().remove(track)));
@@ -158,5 +163,19 @@ public class AlbumService {
             return null;
         }
         return value.trim().toLowerCase();
+    }
+
+    private List<Album> fetchAlbumsForPage(List<Long> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, Integer> order = java.util.stream.IntStream.range(0, ids.size())
+                .boxed()
+                .collect(java.util.stream.Collectors.toMap(ids::get, Function.identity()));
+
+        return albumRepository.findByIdIn(ids).stream()
+                .sorted(Comparator.comparingInt(album -> order.getOrDefault(album.getId(), Integer.MAX_VALUE)))
+                .toList();
     }
 }
