@@ -1,5 +1,6 @@
 package by.aleksandr.music.controller;
 
+import by.aleksandr.music.dto.request.BulkTrackItemRequest;
 import by.aleksandr.music.dto.request.TrackRequest;
 import by.aleksandr.music.dto.response.TrackResponse;
 import by.aleksandr.music.exception.ResourceNotFoundException;
@@ -7,6 +8,7 @@ import by.aleksandr.music.mapper.TrackMapper;
 import by.aleksandr.music.service.TrackService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -50,6 +52,32 @@ public class TrackController {
     public ResponseEntity<TrackResponse> create(@Valid @RequestBody TrackRequest request) {
         TrackResponse response = TrackMapper.toResponse(
                 trackService.create(request.getTitle(), request.getDurationSeconds(), request.getAlbumId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(summary = "Bulk create tracks without transaction")
+    @PostMapping("/bulk/without-transaction")
+    public ResponseEntity<List<TrackResponse>> createBulkWithoutTransaction(
+            @RequestParam Long albumId,
+            @RequestParam(name = "fail", required = false) Integer fail,
+            @RequestBody @NotEmpty List<@Valid BulkTrackItemRequest> requests) {
+        List<TrackResponse> response = trackService.createBulkWithoutTransaction(albumId, requests, fail)
+                .stream()
+                .map(TrackMapper::toResponse)
+                .toList();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(summary = "Bulk create tracks with transaction")
+    @PostMapping("/bulk/with-transaction")
+    public ResponseEntity<List<TrackResponse>> createBulkWithTransaction(
+            @RequestParam Long albumId,
+            @RequestParam(name = "fail", required = false) Integer fail,
+            @RequestBody @NotEmpty List<@Valid BulkTrackItemRequest> requests) {
+        List<TrackResponse> response = trackService.createBulkWithTransaction(albumId, requests, fail)
+                .stream()
+                .map(TrackMapper::toResponse)
+                .toList();
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

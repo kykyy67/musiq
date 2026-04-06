@@ -71,6 +71,8 @@ public class GlobalExceptionHandler {
             String message,
             HttpServletRequest request,
             List<String> details) {
+        logByStatus(status, request, message, details);
+
         ApiErrorResponse response = new ApiErrorResponse(
                 OffsetDateTime.now(),
                 status.value(),
@@ -84,5 +86,26 @@ public class GlobalExceptionHandler {
 
     private String formatFieldError(FieldError fieldError) {
         return fieldError.getField() + ": " + fieldError.getDefaultMessage();
+    }
+
+    private void logByStatus(
+            HttpStatus status,
+            HttpServletRequest request,
+            String message,
+            List<String> details) {
+        String logMessage = "HTTP {} error for {} {}: {}";
+        Object[] args = new Object[]{
+            status.value(),
+            request.getMethod(),
+            request.getRequestURI(),
+            details.isEmpty() ? message : message + " | details=" + details
+        };
+
+        if (status.is5xxServerError()) {
+            log.error(logMessage, args);
+            return;
+        }
+
+        log.warn(logMessage, args);
     }
 }
