@@ -138,6 +138,17 @@ class AlbumServiceTest {
     }
 
     @Test
+    void createShouldAllowEmptyArtistIdsAndNullGenreIds() {
+        AlbumRequest request = new AlbumRequest("Black Holes", 2006, List.of(), null);
+        when(albumRepository.save(any(Album.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Album saved = albumService.create(request);
+
+        assertThat(saved.getArtists()).isEmpty();
+        assertThat(saved.getGenres()).isEmpty();
+    }
+
+    @Test
     void createShouldThrowWhenArtistIdsAreMissing() {
         AlbumRequest request = new AlbumRequest("Black Holes", 2006, List.of(1L, 2L), List.of());
         when(artistRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(Artist.builder().id(1L).build()));

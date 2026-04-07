@@ -158,6 +158,28 @@ class TrackServiceTest {
     }
 
     @Test
+    void createBulkWithTransactionShouldIgnoreNonMatchingFailIndex() {
+        Album album = Album.builder().id(1L).title("Absolution").build();
+        AtomicLong ids = new AtomicLong(0);
+        when(albumRepository.findById(1L)).thenReturn(Optional.of(album));
+        when(trackRepository.save(any(Track.class))).thenAnswer(invocation -> {
+            Track track = invocation.getArgument(0);
+            track.setId(ids.incrementAndGet());
+            return track;
+        });
+
+        List<Track> created = trackService.createBulkWithTransaction(
+                1L,
+                List.of(
+                        new BulkTrackItemRequest("Hysteria", 227),
+                        new BulkTrackItemRequest("Blackout", 280)),
+                99);
+
+        assertThat(created).hasSize(2);
+        verify(trackRepository, times(2)).save(any(Track.class));
+    }
+
+    @Test
     void createBulkWithTransactionShouldThrowWhenListIsEmpty() {
         assertThatThrownBy(() -> trackService.createBulkWithTransaction(1L, List.of(), null))
                 .isInstanceOf(BadRequestException.class)
