@@ -187,6 +187,13 @@ class TrackServiceTest {
     }
 
     @Test
+    void createBulkWithTransactionShouldThrowWhenListIsNull() {
+        assertThatThrownBy(() -> trackService.createBulkWithTransaction(1L, null, null))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Track list must not be empty");
+    }
+
+    @Test
     void createBulkWithoutTransactionShouldStopAtConfiguredFailureIndex() {
         Album album = Album.builder().id(1L).title("Absolution").build();
         when(albumRepository.findById(1L)).thenReturn(Optional.of(album));
