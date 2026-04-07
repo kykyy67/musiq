@@ -50,6 +50,7 @@ class TrackServiceTest {
 
         assertThat(trackService.findAll()).containsExactly(track);
         assertThat(trackService.findByTitle("")).containsExactly(track);
+        assertThat(trackService.findByTitle(null)).containsExactly(track);
         assertThat(trackService.findByTitle("hys")).containsExactly(track);
         assertThat(trackService.findById(1L)).contains(track);
     }
@@ -67,12 +68,47 @@ class TrackServiceTest {
     }
 
     @Test
+    void createShouldThrowWhenAlbumDoesNotExist() {
+        when(albumRepository.findById(7L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> trackService.create("Hysteria", 227, 7L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Album with id 7 not found");
+    }
+
+    @Test
+    void updateShouldPersistChangesWhenTrackAndAlbumExist() {
+        Track existing = Track.builder().id(9L).title("Old").durationSeconds(100).build();
+        Album album = Album.builder().id(7L).title("Absolution").build();
+        when(trackRepository.findById(9L)).thenReturn(Optional.of(existing));
+        when(albumRepository.findById(7L)).thenReturn(Optional.of(album));
+        when(trackRepository.save(existing)).thenReturn(existing);
+
+        Track updated = trackService.update(9L, "Hysteria", 227, 7L);
+
+        assertThat(updated.getTitle()).isEqualTo("Hysteria");
+        assertThat(updated.getDurationSeconds()).isEqualTo(227);
+        assertThat(updated.getAlbum()).isSameAs(album);
+    }
+
+    @Test
     void updateShouldThrowWhenTrackDoesNotExist() {
         when(trackRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> trackService.update(99L, "Hysteria", 227, 7L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Track with id 99 not found");
+    }
+
+    @Test
+    void updateShouldThrowWhenAlbumDoesNotExist() {
+        Track existing = Track.builder().id(9L).title("Old").durationSeconds(100).build();
+        when(trackRepository.findById(9L)).thenReturn(Optional.of(existing));
+        when(albumRepository.findById(7L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> trackService.update(9L, "Hysteria", 227, 7L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Album with id 7 not found");
     }
 
     @Test
@@ -87,6 +123,15 @@ class TrackServiceTest {
         assertThat(user.getTracks()).isEmpty();
         verify(trackRepository).delete(track);
         verify(albumSearchCache).invalidateAll();
+    }
+
+    @Test
+    void deleteByIdShouldThrowWhenTrackDoesNotExist() {
+        when(trackRepository.findById(13L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> trackService.deleteById(13L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Track with id 13 not found");
     }
 
     @Test

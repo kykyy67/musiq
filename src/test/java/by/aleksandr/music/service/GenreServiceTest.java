@@ -39,6 +39,7 @@ class GenreServiceTest {
 
         assertThat(genreService.findAll()).containsExactly(genre);
         assertThat(genreService.findByName("")).containsExactly(genre);
+        assertThat(genreService.findByName(null)).containsExactly(genre);
         assertThat(genreService.findByName("ro")).containsExactly(genre);
         assertThat(genreService.findById(1L)).contains(genre);
     }

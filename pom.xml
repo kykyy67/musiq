@@ -21,6 +21,30 @@
 
     <properties>
         <java.version>21</java.version>
+        <jacoco.version>0.8.12</jacoco.version>
+
+        <sonar.organization>kykyy67</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.projectKey>kykyy67_musiq</sonar.projectKey>
+
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.basedir}/target/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.junit.reportPaths>${project.basedir}/target/surefire-reports</sonar.junit.reportPaths>
+        <sonar.sources>${project.basedir}/src/main/java</sonar.sources>
+        <sonar.tests>${project.basedir}/src/test/java</sonar.tests>
+        <sonar.coverage.exclusions>
+            src/main/java/by/aleksandr/music/MusicApplication.java,
+            src/main/java/by/aleksandr/music/aspect/**,
+            src/main/java/by/aleksandr/music/cache/**,
+            src/main/java/by/aleksandr/music/config/**,
+            src/main/java/by/aleksandr/music/controller/**,
+            src/main/java/by/aleksandr/music/dto/**,
+            src/main/java/by/aleksandr/music/entity/**,
+            src/main/java/by/aleksandr/music/exception/**,
+            src/main/java/by/aleksandr/music/mapper/**,
+            src/main/java/by/aleksandr/music/repository/**
+        </sonar.coverage.exclusions>
     </properties>
 
     <dependencies>
@@ -103,7 +127,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>${jacoco.version}</version>
                 <executions>
                     <execution>
                         <goals>

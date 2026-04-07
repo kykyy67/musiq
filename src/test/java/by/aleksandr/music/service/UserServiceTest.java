@@ -45,6 +45,7 @@ class UserServiceTest {
 
         assertThat(userService.findAll()).containsExactly(user);
         assertThat(userService.findByName("")).containsExactly(user);
+        assertThat(userService.findByName(null)).containsExactly(user);
         assertThat(userService.findByName("an")).containsExactly(user);
         assertThat(userService.findById(1L)).contains(user);
     }
@@ -59,6 +60,15 @@ class UserServiceTest {
 
         assertThat(created.getTracks()).containsExactly(track);
         verify(albumSearchCache).invalidateAll();
+    }
+
+    @Test
+    void createShouldAllowEmptyTrackIds() {
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User created = userService.create("Ann", null);
+
+        assertThat(created.getTracks()).isEmpty();
     }
 
     @Test
@@ -84,6 +94,22 @@ class UserServiceTest {
         assertThat(existing.getName()).isEqualTo("New");
         assertThat(existing.getTracks()).containsExactly(track);
         verify(albumSearchCache).invalidateAll();
+    }
+
+    @Test
+    void updateShouldClearTracksWhenEmptyListIsProvided() {
+        User existing = User.builder()
+                .id(1L)
+                .name("Old")
+                .tracks(new java.util.ArrayList<>(List.of(Track.builder().id(5L).build())))
+                .build();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(userRepository.save(existing)).thenReturn(existing);
+
+        Optional<User> updated = userService.update(1L, "New", List.of());
+
+        assertThat(updated).contains(existing);
+        assertThat(existing.getTracks()).isEmpty();
     }
 
     @Test

@@ -52,6 +52,7 @@ class ArtistServiceTest {
 
         assertThat(artistService.findAll()).containsExactly(artist);
         assertThat(artistService.findByName("")).containsExactly(artist);
+        assertThat(artistService.findByName(null)).containsExactly(artist);
         assertThat(artistService.findByName("mu")).containsExactly(artist);
         assertThat(artistService.findById(1L)).contains(artist);
     }
@@ -98,6 +99,17 @@ class ArtistServiceTest {
     }
 
     @Test
+    void deleteByIdShouldDeleteArtistWhenFound() {
+        Artist artist = Artist.builder().id(3L).name("Muse").build();
+        when(artistRepository.findById(3L)).thenReturn(Optional.of(artist));
+
+        artistService.deleteById(3L);
+
+        verify(artistRepository).delete(artist);
+        verify(albumSearchCache).invalidateAll();
+    }
+
+    @Test
     void saveArtistWithAlbumAndTracksWithoutTransactionShouldCreateFullAggregate() {
         ArtistWithAlbumAndTracksRequest request = request();
         Artist savedArtist = Artist.builder().id(1L).name("Muse").build();
@@ -124,6 +136,18 @@ class ArtistServiceTest {
                 .hasMessage("Simulated composite save failure");
 
         verify(trackRepository, never()).save(any(Track.class));
+    }
+
+    @Test
+    void saveArtistWithAlbumAndTracksWithTransactionShouldSaveTracksWhenNoFailure() {
+        ArtistWithAlbumAndTracksRequest request = request();
+        when(artistRepository.save(any(Artist.class))).thenReturn(Artist.builder().id(1L).name("Muse").build());
+        when(albumRepository.save(any(Album.class))).thenReturn(Album.builder().id(2L).title("Absolution").build());
+        when(trackRepository.save(any(Track.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        artistService.saveArtistWithAlbumAndTracksWithTransaction(request, false);
+
+        verify(trackRepository).save(any(Track.class));
     }
 
     private ArtistWithAlbumAndTracksRequest request() {

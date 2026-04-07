@@ -58,10 +58,10 @@ public class AlbumController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Album found"),
         @ApiResponse(
-            responseCode = "404",
-            description = "Album not found",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        )
+                responseCode = "404",
+                description = "Album not found",
+                content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                )
     })
     @GetMapping("/{id}")
     public AlbumResponse getAlbumById(@PathVariable Long id) {
@@ -74,10 +74,10 @@ public class AlbumController {
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Album created"),
         @ApiResponse(
-            responseCode = "400",
-            description = "Invalid request",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        )
+                responseCode = "400",
+                description = "Invalid request",
+                content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                )
     })
     @PostMapping
     public ResponseEntity<AlbumResponse> create(@Valid @RequestBody AlbumRequest request) {

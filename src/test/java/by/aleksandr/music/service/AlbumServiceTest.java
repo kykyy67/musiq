@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import by.aleksandr.music.cache.AlbumSearchCache;
 import by.aleksandr.music.dto.request.AlbumRequest;
+import by.aleksandr.music.dto.response.AlbumResponse;
 import by.aleksandr.music.dto.response.PagedResponse;
 import by.aleksandr.music.entity.Album;
 import by.aleksandr.music.entity.Artist;
@@ -59,6 +60,7 @@ class AlbumServiceTest {
 
         assertThat(albumService.getAllAlbums()).containsExactlyElementsOf(albums);
         assertThat(albumService.getAlbumsByTitle(null)).containsExactlyElementsOf(albums);
+        assertThat(albumService.getAlbumsByTitle(" ")).containsExactlyElementsOf(albums);
         assertThat(albumService.getAlbumsByTitleWithArtistAndGenres("ori")).containsExactlyElementsOf(albums);
         assertThat(albumService.getAlbumById(1L)).contains(albums.getFirst());
     }
@@ -66,11 +68,12 @@ class AlbumServiceTest {
     @Test
     void searchAlbumsByGenreAndTrackShouldReturnCachedValueWhenPresent() {
         PageRequest pageable = PageRequest.of(0, 2);
-        PagedResponse<?> cached = new PagedResponse<>(List.of(), 0, 2, 0, 0);
+        PagedResponse<AlbumResponse> cached = new PagedResponse<>(List.of(), 0, 2, 0, 0);
         when(albumSearchCache.get(AlbumSearchCache.keyOf("rock", "time", false, pageable)))
-                .thenReturn((PagedResponse) cached);
+                .thenReturn(cached);
 
-        PagedResponse<?> response = albumService.searchAlbumsByGenreAndTrack("rock", "time", false, pageable);
+        PagedResponse<AlbumResponse> response = albumService.searchAlbumsByGenreAndTrack(
+                "rock", "time", false, pageable);
 
         assertThat(response).isSameAs(cached);
         verify(albumRepository, never()).searchAlbumIdsJpql(any(), any(), any());
@@ -87,10 +90,24 @@ class AlbumServiceTest {
                 .thenReturn(new PageImpl<>(List.of(20L, 10L), pageable, 2));
         when(albumRepository.findByIdIn(List.of(20L, 10L))).thenReturn(List.of(first, second));
 
-        PagedResponse<?> response = albumService.searchAlbumsByGenreAndTrack(" ROCK ", " Time ", false, pageable);
+        PagedResponse<AlbumResponse> response = albumService.searchAlbumsByGenreAndTrack(
+                " ROCK ", " Time ", false, pageable);
 
         assertThat(response.getContent()).extracting("id").containsExactly(20L, 10L);
         verify(albumSearchCache).put(any(), eq(response));
+    }
+
+    @Test
+    void searchAlbumsByGenreAndTrackShouldUseNativeQueryAndHandleEmptyPage() {
+        PageRequest pageable = PageRequest.of(0, 5);
+        when(albumSearchCache.get(any())).thenReturn(null);
+        when(albumRepository.searchAlbumIdsNative(null, null, pageable))
+                .thenReturn(new PageImpl<>(List.of(), pageable, 0));
+
+        PagedResponse<AlbumResponse> response = albumService.searchAlbumsByGenreAndTrack(" ", null, true, pageable);
+
+        assertThat(response.getContent()).isEmpty();
+        assertThat(response.getTotalElements()).isZero();
     }
 
     @Test
@@ -110,6 +127,17 @@ class AlbumServiceTest {
     }
 
     @Test
+    void createShouldAllowMissingOptionalRelations() {
+        AlbumRequest request = new AlbumRequest("Black Holes", 2006, null, List.of());
+        when(albumRepository.save(any(Album.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Album saved = albumService.create(request);
+
+        assertThat(saved.getArtists()).isEmpty();
+        assertThat(saved.getGenres()).isEmpty();
+    }
+
+    @Test
     void createShouldThrowWhenArtistIdsAreMissing() {
         AlbumRequest request = new AlbumRequest("Black Holes", 2006, List.of(1L, 2L), List.of());
         when(artistRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(Artist.builder().id(1L).build()));
@@ -120,13 +148,23 @@ class AlbumServiceTest {
     }
 
     @Test
+    void createShouldThrowWhenGenreIdsAreMissing() {
+        AlbumRequest request = new AlbumRequest("Black Holes", 2006, List.of(), List.of(1L, 2L));
+        when(genreRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(Genre.builder().id(1L).build()));
+
+        assertThatThrownBy(() -> albumService.create(request))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("One or more genre ids do not exist");
+    }
+
+    @Test
     void updateShouldReplaceRelationsAndInvalidateCache() {
         Album existing = Album.builder()
                 .id(5L)
                 .title("Old")
                 .releaseYear(1999)
-                .artists(Set.of(Artist.builder().id(7L).name("Old Artist").build()))
-                .genres(Set.of(Genre.builder().id(8L).name("Old Genre").build()))
+                .artists(new java.util.HashSet<>(Set.of(Artist.builder().id(7L).name("Old Artist").build())))
+                .genres(new java.util.HashSet<>(Set.of(Genre.builder().id(8L).name("Old Genre").build())))
                 .build();
         AlbumRequest request = new AlbumRequest("New", 2001, List.of(1L), List.of(2L));
         Artist artist = Artist.builder().id(1L).name("New Artist").build();
