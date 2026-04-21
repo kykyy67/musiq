@@ -112,7 +112,7 @@ public class TrackService {
         }
 
         Album album = albumRepository.findById(albumId)
-                .orElseThrow(() -> new ResourceNotFoundException("Album with id " + albumId + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ALBUM_WITH_ID + albumId + NOT_FOUND));
 
         return IntStream.range(0, requests.size())
                 .mapToObj(index -> saveBulkTrack(album, requests.get(index), index, fail))

@@ -4,8 +4,10 @@ import by.aleksandr.music.dto.response.RaceConditionDemoResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.stereotype.Service;
@@ -19,7 +21,7 @@ public class RaceConditionDemoService {
         SynchronizedCounter synchronizedCounter = new SynchronizedCounter();
         int expectedTotal = threadCount * iterationsPerThread;
         CountDownLatch startSignal = new CountDownLatch(1);
-        List<java.util.concurrent.Future<?>> futures = new ArrayList<>();
+        List<Future<?>> futures = new ArrayList<>();
         long startedAt = System.nanoTime();
 
         try (ExecutorService executorService = Executors.newFixedThreadPool(threadCount)) {
@@ -59,8 +61,8 @@ public class RaceConditionDemoService {
         }
     }
 
-    void waitForFutures(List<java.util.concurrent.Future<?>> futures) throws Exception {
-        for (java.util.concurrent.Future<?> future : futures) {
+    void waitForFutures(List<Future<?>> futures) throws InterruptedException, ExecutionException {
+        for (Future<?> future : futures) {
             future.get();
         }
     }

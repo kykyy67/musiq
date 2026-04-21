@@ -34,7 +34,7 @@ class AsyncBusinessTaskServiceTest {
     }
 
     @Test
-    void startTaskShouldReturnIdAndEventuallyComplete() throws InterruptedException {
+    void startTaskShouldReturnIdAndEventuallyComplete() {
         long taskId = asyncBusinessTaskService.startTask(new AsyncTaskRequest(3, 20L, 2));
 
         AsyncTaskStatusResponse finalStatus = waitUntilCompleted(taskId);
@@ -48,7 +48,7 @@ class AsyncBusinessTaskServiceTest {
         assertThat(finalStatus.errorMessage()).isNull();
     }
 
-    private AsyncTaskStatusResponse waitUntilCompleted(long taskId) throws InterruptedException {
+    private AsyncTaskStatusResponse waitUntilCompleted(long taskId) {
         long deadline = System.currentTimeMillis() + 3_000;
         AsyncTaskStatusResponse currentStatus = asyncBusinessTaskService.getTaskStatus(taskId);
         while (!"COMPLETED".equals(currentStatus.status()) && System.currentTimeMillis() < deadline) {

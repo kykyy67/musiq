@@ -214,8 +214,9 @@ class TrackServiceTest {
     void createBulkWithTransactionShouldThrowWhenAlbumDoesNotExist() {
         when(albumRepository.findById(8L)).thenReturn(Optional.empty());
         List<BulkTrackItemRequest> requests = List.of(new BulkTrackItemRequest("Hysteria", 227));
+        Long albumId = 8L;
 
-        assertThatThrownBy(() -> trackService.createBulkWithTransaction(8L, requests, null))
+        assertThatThrownBy(() -> trackService.createBulkWithTransaction(albumId, requests, null))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Album with id 8 not found");
     }

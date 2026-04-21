@@ -53,7 +53,7 @@ class RaceConditionDemoServiceTest {
     void runDemoShouldWrapUnexpectedExecutionFailure() {
         RaceConditionDemoService failingService = new RaceConditionDemoService() {
             @Override
-            void waitForFutures(List<Future<?>> futures) throws Exception {
+            void waitForFutures(List<Future<?>> futures) throws ExecutionException {
                 throw new ExecutionException(new RuntimeException("boom"));
             }
         };
