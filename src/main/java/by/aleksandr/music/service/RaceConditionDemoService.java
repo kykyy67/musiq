@@ -18,39 +18,39 @@ public class RaceConditionDemoService {
         AtomicInteger atomicCounter = new AtomicInteger();
         SynchronizedCounter synchronizedCounter = new SynchronizedCounter();
         int expectedTotal = threadCount * iterationsPerThread;
-
-        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
         CountDownLatch startSignal = new CountDownLatch(1);
         List<java.util.concurrent.Future<?>> futures = new ArrayList<>();
         long startedAt = System.nanoTime();
 
-        try {
-            for (int index = 0; index < threadCount; index++) {
-                futures.add(executorService.submit(() -> {
-                    awaitStart(startSignal);
-                    for (int iteration = 0; iteration < iterationsPerThread; iteration++) {
-                        unsafeCounter.increment();
-                        atomicCounter.incrementAndGet();
-                        synchronizedCounter.increment();
-                    }
-                }));
-            }
-
-            startSignal.countDown();
-            for (java.util.concurrent.Future<?> future : futures) {
-                future.get();
-            }
-        } catch (Exception exception) {
-            throw new IllegalStateException("Race condition demo failed", exception);
-        } finally {
-            executorService.shutdown();
+        try (ExecutorService executorService = Executors.newFixedThreadPool(threadCount)) {
             try {
-                if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                for (int index = 0; index < threadCount; index++) {
+                    futures.add(executorService.submit(() -> {
+                        awaitStart(startSignal);
+                        for (int iteration = 0; iteration < iterationsPerThread; iteration++) {
+                            unsafeCounter.increment();
+                            atomicCounter.incrementAndGet();
+                            synchronizedCounter.increment();
+                        }
+                    }));
+                }
+
+                startSignal.countDown();
+                for (java.util.concurrent.Future<?> future : futures) {
+                    future.get();
+                }
+            } catch (Exception exception) {
+                throw new IllegalStateException("Race condition demo failed", exception);
+            } finally {
+                executorService.shutdown();
+                try {
+                    if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                        executorService.shutdownNow();
+                    }
+                } catch (InterruptedException interruptedException) {
+                    Thread.currentThread().interrupt();
                     executorService.shutdownNow();
                 }
-            } catch (InterruptedException interruptedException) {
-                Thread.currentThread().interrupt();
-                executorService.shutdownNow();
             }
         }
 
