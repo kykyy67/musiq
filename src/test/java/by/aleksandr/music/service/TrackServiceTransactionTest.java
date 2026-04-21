@@ -46,12 +46,11 @@ class TrackServiceTransactionTest {
 
     @Test
     void bulkWithoutTransactionShouldKeepAlreadySavedTracksAfterFailure() {
-        assertThatThrownBy(() -> trackService.createBulkWithoutTransaction(
-                albumId,
-                List.of(
-                        new BulkTrackItemRequest("Hysteria", 227),
-                        new BulkTrackItemRequest("Blackout", 280)),
-                1))
+        List<BulkTrackItemRequest> requests = List.of(
+                new BulkTrackItemRequest("Hysteria", 227),
+                new BulkTrackItemRequest("Blackout", 280));
+
+        assertThatThrownBy(() -> trackService.createBulkWithoutTransaction(albumId, requests, 1))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Simulated bulk failure at index 1");
 
@@ -60,12 +59,11 @@ class TrackServiceTransactionTest {
 
     @Test
     void bulkWithTransactionShouldRollbackAllTracksAfterFailure() {
-        assertThatThrownBy(() -> trackService.createBulkWithTransaction(
-                albumId,
-                List.of(
-                        new BulkTrackItemRequest("Hysteria", 227),
-                        new BulkTrackItemRequest("Blackout", 280)),
-                1))
+        List<BulkTrackItemRequest> requests = List.of(
+                new BulkTrackItemRequest("Hysteria", 227),
+                new BulkTrackItemRequest("Blackout", 280));
+
+        assertThatThrownBy(() -> trackService.createBulkWithTransaction(albumId, requests, 1))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Simulated bulk failure at index 1");
 

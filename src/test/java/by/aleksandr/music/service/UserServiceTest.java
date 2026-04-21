@@ -74,8 +74,9 @@ class UserServiceTest {
     @Test
     void createShouldThrowWhenTrackIdsAreMissing() {
         when(trackRepository.findAllById(List.of(3L, 4L))).thenReturn(List.of(Track.builder().id(3L).build()));
+        List<Long> trackIds = List.of(3L, 4L);
 
-        assertThatThrownBy(() -> userService.create("Ann", List.of(3L, 4L)))
+        assertThatThrownBy(() -> userService.create("Ann", trackIds))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("One or more track ids do not exist");
     }

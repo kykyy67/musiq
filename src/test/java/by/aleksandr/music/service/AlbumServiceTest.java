@@ -197,8 +197,9 @@ class AlbumServiceTest {
     @Test
     void updateShouldThrowWhenAlbumDoesNotExist() {
         when(albumRepository.findWithEntityGraphById(99L)).thenReturn(Optional.empty());
+        AlbumRequest request = new AlbumRequest("New", 2001, List.of(), List.of());
 
-        assertThatThrownBy(() -> albumService.update(99L, new AlbumRequest("New", 2001, List.of(), List.of())))
+        assertThatThrownBy(() -> albumService.update(99L, request))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Album with id 99 not found");
     }

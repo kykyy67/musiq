@@ -68,6 +68,19 @@ class AsyncTaskRegistryTest {
     }
 
     @Test
+    void markCompletedShouldPreserveStartedAtWhenTaskIsAlreadyRunning() {
+        AsyncTaskRegistry registry = new AsyncTaskRegistry();
+        long taskId = registry.createTask(2);
+
+        registry.markRunning(taskId);
+        AsyncTaskStatusResponse runningTask = registry.getTask(taskId);
+        registry.markCompleted(taskId, 4, 4);
+        AsyncTaskStatusResponse completedTask = registry.getTask(taskId);
+
+        assertThat(completedTask.startedAt()).isEqualTo(runningTask.startedAt());
+    }
+
+    @Test
     void markFailedShouldFillFailureFieldsEvenWithoutRunningState() {
         AsyncTaskRegistry registry = new AsyncTaskRegistry();
         long taskId = registry.createTask(1);
@@ -79,6 +92,19 @@ class AsyncTaskRegistryTest {
         assertThat(task.startedAt()).isNotNull();
         assertThat(task.completedAt()).isNotNull();
         assertThat(task.errorMessage()).isEqualTo("Failure");
+    }
+
+    @Test
+    void markFailedShouldPreserveStartedAtWhenTaskIsAlreadyRunning() {
+        AsyncTaskRegistry registry = new AsyncTaskRegistry();
+        long taskId = registry.createTask(1);
+
+        registry.markRunning(taskId);
+        AsyncTaskStatusResponse runningTask = registry.getTask(taskId);
+        registry.markFailed(taskId, "Failure");
+        AsyncTaskStatusResponse failedTask = registry.getTask(taskId);
+
+        assertThat(failedTask.startedAt()).isEqualTo(runningTask.startedAt());
     }
 
     @Test

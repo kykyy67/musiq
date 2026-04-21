@@ -196,15 +196,13 @@ class TrackServiceTest {
     @Test
     void createBulkWithoutTransactionShouldStopAtConfiguredFailureIndex() {
         Album album = Album.builder().id(1L).title("Absolution").build();
+        List<BulkTrackItemRequest> requests = List.of(
+                new BulkTrackItemRequest("Hysteria", 227),
+                new BulkTrackItemRequest("Blackout", 280));
         when(albumRepository.findById(1L)).thenReturn(Optional.of(album));
         when(trackRepository.save(any(Track.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        assertThatThrownBy(() -> trackService.createBulkWithoutTransaction(
-                1L,
-                List.of(
-                        new BulkTrackItemRequest("Hysteria", 227),
-                        new BulkTrackItemRequest("Blackout", 280)),
-                1))
+        assertThatThrownBy(() -> trackService.createBulkWithoutTransaction(1L, requests, 1))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Simulated bulk failure at index 1");
 
@@ -215,11 +213,9 @@ class TrackServiceTest {
     @Test
     void createBulkWithTransactionShouldThrowWhenAlbumDoesNotExist() {
         when(albumRepository.findById(8L)).thenReturn(Optional.empty());
+        List<BulkTrackItemRequest> requests = List.of(new BulkTrackItemRequest("Hysteria", 227));
 
-        assertThatThrownBy(() -> trackService.createBulkWithTransaction(
-                8L,
-                List.of(new BulkTrackItemRequest("Hysteria", 227)),
-                null))
+        assertThatThrownBy(() -> trackService.createBulkWithTransaction(8L, requests, null))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Album with id 8 not found");
     }

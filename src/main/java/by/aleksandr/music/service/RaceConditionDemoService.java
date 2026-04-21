@@ -23,35 +23,20 @@ public class RaceConditionDemoService {
         long startedAt = System.nanoTime();
 
         try (ExecutorService executorService = Executors.newFixedThreadPool(threadCount)) {
-            try {
-                for (int index = 0; index < threadCount; index++) {
-                    futures.add(executorService.submit(() -> {
-                        awaitStart(startSignal);
-                        for (int iteration = 0; iteration < iterationsPerThread; iteration++) {
-                            unsafeCounter.increment();
-                            atomicCounter.incrementAndGet();
-                            synchronizedCounter.increment();
-                        }
-                    }));
-                }
-
-                startSignal.countDown();
-                for (java.util.concurrent.Future<?> future : futures) {
-                    future.get();
-                }
-            } catch (Exception exception) {
-                throw new IllegalStateException("Race condition demo failed", exception);
-            } finally {
-                executorService.shutdown();
-                try {
-                    if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
-                        executorService.shutdownNow();
+            for (int index = 0; index < threadCount; index++) {
+                futures.add(executorService.submit(() -> {
+                    awaitStart(startSignal);
+                    for (int iteration = 0; iteration < iterationsPerThread; iteration++) {
+                        unsafeCounter.increment();
+                        atomicCounter.incrementAndGet();
+                        synchronizedCounter.increment();
                     }
-                } catch (InterruptedException interruptedException) {
-                    Thread.currentThread().interrupt();
-                    executorService.shutdownNow();
-                }
+                }));
             }
+            startSignal.countDown();
+            waitForFutures(futures);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Race condition demo failed", exception);
         }
 
         long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt);
@@ -71,6 +56,12 @@ public class RaceConditionDemoService {
         } catch (InterruptedException interruptedException) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Race condition demo was interrupted", interruptedException);
+        }
+    }
+
+    void waitForFutures(List<java.util.concurrent.Future<?>> futures) throws Exception {
+        for (java.util.concurrent.Future<?> future : futures) {
+            future.get();
         }
     }
 

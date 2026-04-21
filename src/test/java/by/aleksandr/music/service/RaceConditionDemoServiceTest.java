@@ -6,7 +6,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import by.aleksandr.music.dto.response.RaceConditionDemoResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.junit.jupiter.api.Test;
 
 class RaceConditionDemoServiceTest {
@@ -44,6 +47,21 @@ class RaceConditionDemoServiceTest {
 
         assertThat(Thread.currentThread().isInterrupted()).isTrue();
         Thread.interrupted();
+    }
+
+    @Test
+    void runDemoShouldWrapUnexpectedExecutionFailure() {
+        RaceConditionDemoService failingService = new RaceConditionDemoService() {
+            @Override
+            void waitForFutures(List<Future<?>> futures) throws Exception {
+                throw new ExecutionException(new RuntimeException("boom"));
+            }
+        };
+
+        assertThatThrownBy(() -> failingService.runDemo(2, 2))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Race condition demo failed")
+                .hasCauseInstanceOf(ExecutionException.class);
     }
 
     private void invokeAwaitStart(Method method) throws Throwable {

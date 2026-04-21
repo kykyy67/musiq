@@ -20,6 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TrackService {
 
+    private static final String ALBUM_WITH_ID = "Album with id ";
+    private static final String TRACK_WITH_ID = "Track with id ";
+    private static final String NOT_FOUND = " not found";
+
     private final TrackRepository trackRepository;
     private final AlbumRepository albumRepository;
     private final AlbumSearchCache albumSearchCache;
@@ -42,7 +46,7 @@ public class TrackService {
     @Transactional
     public Track create(String title, Integer durationSeconds, Long albumId) {
         Album album = albumRepository.findById(albumId)
-                .orElseThrow(() -> new ResourceNotFoundException("Album with id " + albumId + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ALBUM_WITH_ID + albumId + NOT_FOUND));
         Track track = Track.builder()
                 .title(title)
                 .durationSeconds(durationSeconds)
@@ -56,11 +60,11 @@ public class TrackService {
     @Transactional
     public Track update(Long id, String title, Integer durationSeconds, Long albumId) {
         Track existing = trackRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Track with id " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(TRACK_WITH_ID + id + NOT_FOUND));
         existing.setTitle(title);
         existing.setDurationSeconds(durationSeconds);
         Album album = albumRepository.findById(albumId)
-                .orElseThrow(() -> new ResourceNotFoundException("Album with id " + albumId + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ALBUM_WITH_ID + albumId + NOT_FOUND));
         existing.setAlbum(album);
         Track saved = trackRepository.save(existing);
         albumSearchCache.invalidateAll();
@@ -70,7 +74,7 @@ public class TrackService {
     @Transactional
     public void deleteById(Long id) {
         Track track = trackRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Track with id " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(TRACK_WITH_ID + id + NOT_FOUND));
         track.getUsers().forEach(user -> user.getTracks().remove(track));
         trackRepository.delete(track);
         albumSearchCache.invalidateAll();

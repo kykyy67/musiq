@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import by.aleksandr.music.dto.request.AsyncTaskRequest;
 import by.aleksandr.music.dto.response.AsyncTaskStatusResponse;
+import java.util.concurrent.locks.LockSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,7 @@ class AsyncBusinessTaskServiceTest {
         long deadline = System.currentTimeMillis() + 3_000;
         AsyncTaskStatusResponse currentStatus = asyncBusinessTaskService.getTaskStatus(taskId);
         while (!"COMPLETED".equals(currentStatus.status()) && System.currentTimeMillis() < deadline) {
-            Thread.sleep(25);
+            LockSupport.parkNanos(25_000_000L);
             currentStatus = asyncBusinessTaskService.getTaskStatus(taskId);
         }
         return currentStatus;
