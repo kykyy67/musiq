@@ -702,6 +702,22 @@ label span {
     justify-content: flex-start;
 }
 
+.entity-tile.artist-tile,
+.entity-tile.genre {
+    display: flex;
+    flex-direction: column;
+}
+
+.tile-row-actions {
+    margin-top: auto;
+    width: 100%;
+    align-items: center;
+}
+
+.push-right {
+    margin-left: auto;
+}
+
 .inline-actions.centered {
     justify-content: center;
 }

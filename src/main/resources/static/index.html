@@ -235,9 +235,9 @@
                         <div class="avatar big">{{ initials(artist.name) }}</div>
                         <h3>{{ artist.name }}</h3>
                         <p>{{ artistAlbumPreview(artist.albumIds) }}</p>
-                        <div class="inline-actions">
+                        <div class="inline-actions tile-row-actions">
                             <button class="small-button" @click="openArtistAlbumsModal(artist)">Все альбомы</button>
-                            <button class="small-button" @click="openEdit('artist', artist)" title="Изменить" aria-label="Изменить">✏️</button>
+                            <button class="small-button push-right" @click="openEdit('artist', artist)" title="Изменить" aria-label="Изменить">✏️</button>
                             <button class="small-button danger" @click="removeEntity('artist', artist.id, artist.name)" title="Удалить" aria-label="Удалить">🗑️</button>
                         </div>
                     </article>
@@ -269,9 +269,9 @@
                     <article class="entity-tile genre" v-for="genre in genres.content" :key="genre.id">
                         <h3>{{ genre.name }}</h3>
                         <p>{{ genreAlbumPreview(genre.albumIds) }}</p>
-                        <div class="inline-actions">
+                        <div class="inline-actions tile-row-actions">
                             <button class="small-button" @click="openGenreAlbumsModal(genre)">Все альбомы</button>
-                            <button class="small-button" @click="openEdit('genre', genre)" title="Изменить" aria-label="Изменить">✏️</button>
+                            <button class="small-button push-right" @click="openEdit('genre', genre)" title="Изменить" aria-label="Изменить">✏️</button>
                             <button class="small-button danger" @click="removeEntity('genre', genre.id, genre.name)" title="Удалить" aria-label="Удалить">🗑️</button>
                         </div>
                     </article>
