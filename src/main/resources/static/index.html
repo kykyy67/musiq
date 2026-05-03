@@ -60,25 +60,6 @@
             </header>
 
             <section v-if="activeView === 'home'" class="screen">
-                <div class="hero-card">
-                    <div>
-                        <p class="section-kicker">подборка</p>
-                        <h2>{{ featuredAlbum ? featuredAlbum.title : 'Твоя музыкальная библиотека' }}</h2>
-                        <p>
-                            {{ featuredAlbum
-                            ? `Год выпуска: ${featuredAlbum.releaseYear}. Внутри уже есть треки, исполнители и жанры, всё загружается автоматически.`
-                            : 'Здесь собран весь музыкальный каталог. Всё, что ты видишь, открывается и обновляется через сервер.' }}
-                        </p>
-                        <div class="hero-actions">
-                            <button class="primary-button" @click="navigate('albums')">Открыть альбомы</button>
-                            <button class="ghost-button" @click="navigate('tracks')">Смотреть треки</button>
-                        </div>
-                    </div>
-                    <div class="hero-badge">
-                        <span>всё на месте</span>
-                        <strong>каталог</strong>
-                    </div>
-                </div>
 
                 <div class="shelf">
                     <div class="shelf-head">
@@ -159,38 +140,38 @@
                             <span>{{ initials(album.title) }}</span>
                         </div>
                         <div class="album-detail-body">
-                            <div class="card-head">
-                                <div>
-                                    <h3>{{ album.title }}</h3>
-                                    <p>{{ album.releaseYear }}</p>
-                                </div>
-                                <div class="inline-actions">
-                                    <button class="small-button" @click="openTrackForAlbum(album)">Добавить трек</button>
-                                    <button class="small-button" @click="openEdit('album', album)">Изменить</button>
-                                    <button class="small-button danger" @click="removeEntity('album', album.id, album.title)">Удалить</button>
-                                </div>
-                            </div>
-
-                            <div class="info-block">
-                                <span class="info-title">Исполнители</span>
-                                <div class="chip-row">
-                                    <span class="chip" v-for="artistId in album.artistIds" :key="'artist-' + artistId">{{ artistName(artistId) }}</span>
-                                </div>
-                            </div>
-
-                            <div class="chip-row">
-                                <span class="chip muted" v-for="genreId in album.genreIds" :key="genreId">{{ genreName(genreId) }}</span>
-                            </div>
-
-                            <div class="track-stack">
-                                <div class="track-line" v-for="track in album.tracks" :key="track.id">
+                            <div class="album-card-layout">
+                                <div class="album-top-row">
                                     <div>
-                                        <strong>{{ track.title }}</strong>
-                                        <span>{{ albumArtistList(track.albumId) }}</span>
+                                        <h3>{{ album.title }}</h3>
+                                        <p>{{ album.releaseYear }}</p>
                                     </div>
-                                    <em>{{ formatDuration(track.durationSeconds) }}</em>
+                                    <button class="small-button album-edit-button" @click="openEdit('album', album)">Изменить</button>
                                 </div>
-                                <div v-if="!album.tracks.length" class="empty-state small">В этом альбоме пока нет треков</div>
+
+                                <div class="album-center-row">
+                                    <button class="small-button album-center-button" @click="openAlbumTracksModal(album)">Треки</button>
+                                </div>
+
+                                <div class="album-main-info">
+                                    <div class="info-block">
+                                        <span class="info-title">Исполнители</span>
+                                        <div class="chip-row">
+                                            <span class="chip" v-for="artistId in album.artistIds" :key="'artist-' + artistId">{{ artistName(artistId) }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="chip-row">
+                                        <span class="chip muted" v-for="genreId in album.genreIds" :key="genreId">{{ genreName(genreId) }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="album-bottom-row">
+                                    <div class="album-bottom-actions">
+                                        <button class="small-button" @click="openTrackForAlbum(album)">Добавить трек</button>
+                                        <button class="small-button danger" @click="removeEntity('album', album.id, album.title)">Удалить</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </article>
@@ -261,11 +242,12 @@
                 </div>
 
                 <div class="tile-grid">
-                    <article class="entity-tile" v-for="artist in artists.content" :key="artist.id">
+                    <article class="entity-tile artist-tile" v-for="artist in artists.content" :key="artist.id">
                         <div class="avatar big">{{ initials(artist.name) }}</div>
                         <h3>{{ artist.name }}</h3>
-                        <p>{{ albumList(artist.albumIds) }}</p>
-                        <div class="inline-actions centered">
+                        <p>{{ artistAlbumPreview(artist.albumIds) }}</p>
+                        <div class="inline-actions">
+                            <button class="small-button" @click="openArtistAlbumsModal(artist)">Все альбомы</button>
                             <button class="small-button" @click="openEdit('artist', artist)">Изменить</button>
                             <button class="small-button danger" @click="removeEntity('artist', artist.id, artist.name)">Удалить</button>
                         </div>
@@ -297,8 +279,9 @@
                 <div class="tile-grid">
                     <article class="entity-tile genre" v-for="genre in genres.content" :key="genre.id">
                         <h3>{{ genre.name }}</h3>
-                        <p>{{ albumList(genre.albumIds) }}</p>
-                        <div class="inline-actions centered">
+                        <p>{{ genreAlbumPreview(genre.albumIds) }}</p>
+                        <div class="inline-actions">
+                            <button class="small-button" @click="openGenreAlbumsModal(genre)">Все альбомы</button>
                             <button class="small-button" @click="openEdit('genre', genre)">Изменить</button>
                             <button class="small-button danger" @click="removeEntity('genre', genre.id, genre.name)">Удалить</button>
                         </div>
@@ -365,7 +348,7 @@
                     </label>
                     <label>
                         <span>Альбом</span>
-                        <select v-model.number="modal.form.albumId" required>
+                        <select v-model.number="modal.form.albumId" size="8" required>
                             <option disabled value="">Выбери альбом</option>
                             <option v-for="album in reference.albums" :key="album.id" :value="album.id">{{ album.title }}</option>
                         </select>
@@ -417,6 +400,77 @@
         </div>
     </div>
 
+    <div class="modal-backdrop" v-if="albumTracksModal.open" @click.self="closeAlbumTracksModal">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <p class="section-kicker">треки альбома</p>
+                    <h3>{{ albumTracksModal.album?.title || 'Альбом' }}</h3>
+                </div>
+                <button class="ghost-button" @click="closeAlbumTracksModal">Закрыть</button>
+            </div>
+
+            <div class="track-stack">
+                <div class="track-line" v-for="track in (albumTracksModal.album?.tracks || [])" :key="track.id">
+                    <div>
+                        <strong>{{ track.title }}</strong>
+                        <span>&nbsp;· {{ albumArtistList(track.albumId) }}</span>
+                    </div>
+                    <em>{{ formatDuration(track.durationSeconds) }}</em>
+                </div>
+                <div v-if="!(albumTracksModal.album?.tracks || []).length" class="empty-state small">
+                    В этом альбоме пока нет треков
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" v-if="artistAlbumsModal.open" @click.self="closeArtistAlbumsModal">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <p class="section-kicker">альбомы артиста</p>
+                    <h3>{{ artistAlbumsModal.artist?.name || 'Артист' }}</h3>
+                </div>
+                <button class="ghost-button" @click="closeArtistAlbumsModal">Закрыть</button>
+            </div>
+
+            <div class="track-stack">
+                <div class="track-line" v-for="albumId in (artistAlbumsModal.artist?.albumIds || [])" :key="albumId">
+                    <div>
+                        <strong>{{ albumTitle(albumId) }}</strong>
+                    </div>
+                </div>
+                <div v-if="!(artistAlbumsModal.artist?.albumIds || []).length" class="empty-state small">
+                    У артиста пока нет альбомов
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" v-if="genreAlbumsModal.open" @click.self="closeGenreAlbumsModal">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <p class="section-kicker">альбомы жанра</p>
+                    <h3>{{ genreAlbumsModal.genre?.name || 'Жанр' }}</h3>
+                </div>
+                <button class="ghost-button" @click="closeGenreAlbumsModal">Закрыть</button>
+            </div>
+
+            <div class="track-stack">
+                <div class="track-line" v-for="albumId in (genreAlbumsModal.genre?.albumIds || [])" :key="albumId">
+                    <div>
+                        <strong>{{ albumTitle(albumId) }}</strong>
+                    </div>
+                </div>
+                <div v-if="!(genreAlbumsModal.genre?.albumIds || []).length" class="empty-state small">
+                    Для этого жанра пока нет альбомов
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="toast" v-if="toast">{{ toast }}</div>
 </div>
 

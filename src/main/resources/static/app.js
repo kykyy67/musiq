@@ -44,6 +44,18 @@
                 artists: emptyPage(),
                 genres: emptyPage(),
                 users: emptyPage(),
+                albumTracksModal: {
+                    open: false,
+                    album: null
+                },
+                artistAlbumsModal: {
+                    open: false,
+                    artist: null
+                },
+                genreAlbumsModal: {
+                    open: false,
+                    genre: null
+                },
                 albumFilters: {
                     title: "",
                     genreName: "",
@@ -187,6 +199,44 @@
                 this.activeView = view;
                 window.location.hash = `/${view}`;
                 this.refreshActiveView();
+            },
+            openAlbumTracksModal(album) {
+                this.albumTracksModal.open = true;
+                this.albumTracksModal.album = album;
+            },
+            closeAlbumTracksModal() {
+                this.albumTracksModal.open = false;
+                this.albumTracksModal.album = null;
+            },
+            artistAlbumPreview(albumIds) {
+                if (!albumIds || !albumIds.length) {
+                    return "Нет альбомов";
+                }
+                const firstTwo = albumIds.slice(0, 2).map(this.albumTitle);
+                return albumIds.length > 2 ? `${firstTwo.join(", ")}...` : firstTwo.join(", ");
+            },
+            openArtistAlbumsModal(artist) {
+                this.artistAlbumsModal.open = true;
+                this.artistAlbumsModal.artist = artist;
+            },
+            closeArtistAlbumsModal() {
+                this.artistAlbumsModal.open = false;
+                this.artistAlbumsModal.artist = null;
+            },
+            genreAlbumPreview(albumIds) {
+                if (!albumIds || !albumIds.length) {
+                    return "Нет альбомов";
+                }
+                const firstTwo = albumIds.slice(0, 2).map(this.albumTitle);
+                return albumIds.length > 2 ? `${firstTwo.join(", ")}...` : firstTwo.join(", ");
+            },
+            openGenreAlbumsModal(genre) {
+                this.genreAlbumsModal.open = true;
+                this.genreAlbumsModal.genre = genre;
+            },
+            closeGenreAlbumsModal() {
+                this.genreAlbumsModal.open = false;
+                this.genreAlbumsModal.genre = null;
             },
             notify(message) {
                 this.toast = message;
