@@ -32,9 +32,6 @@
                 </button>
             </nav>
 
-            <div class="sidebar-note">
-                <p>Один интерфейс для всего каталога: альбомы, треки, артисты, жанры, пользователи и отдельный раздел для лабораторной части.</p>
-            </div>
         </aside>
 
         <main class="content">
@@ -44,7 +41,9 @@
                     <h1>{{ currentViewMeta.title }}</h1>
                     <p class="section-copy">{{ currentViewMeta.copy }}</p>
                 </div>
-                <div class="topbar-stats">
+                    <div
+                            v-if="!['albums', 'tracks', 'artists'].includes(activeView)"
+                            class="topbar-stats">
                     <div class="topbar-stat">
                         <span>Альбомы</span>
                         <strong>{{ dashboard.albums }}</strong>
@@ -310,93 +309,6 @@
                     <button class="ghost-button" :disabled="genres.page === 0" @click="loadGenres(genres.page - 1)">Назад</button>
                     <span>Страница {{ genres.page + 1 }} из {{ pageCount(genres.totalPages) }}</span>
                     <button class="ghost-button" :disabled="genres.page + 1 >= genres.totalPages" @click="loadGenres(genres.page + 1)">Вперёд</button>
-                </div>
-            </section>
-
-            <section v-if="activeView === 'users'" class="screen">
-                <div class="toolbar">
-                    <div class="toolbar-fields one">
-                        <label>
-                            <span>Пользователь</span>
-                            <input v-model.trim="userFilters.name" @keyup.enter="loadUsers(0)" placeholder="Найти пользователя">
-                        </label>
-                    </div>
-                    <div class="toolbar-actions">
-                        <button class="ghost-button" @click="resetUsers">Сбросить</button>
-                        <button class="primary-button" @click="loadUsers(0)">Показать</button>
-                        <button class="secondary-button" @click="openCreate('user')">Новый пользователь</button>
-                    </div>
-                </div>
-
-                <div class="tile-grid">
-                    <article class="entity-tile" v-for="user in users.content" :key="user.id">
-                        <div class="avatar big">{{ initials(user.name) }}</div>
-                        <h3>{{ user.name }}</h3>
-                        <p>{{ trackList(user.trackIds) }}</p>
-                        <div class="inline-actions centered">
-                            <button class="small-button" @click="openEdit('user', user)">Изменить</button>
-                            <button class="small-button danger" @click="removeEntity('user', user.id, user.name)">Удалить</button>
-                        </div>
-                    </article>
-                </div>
-
-                <div class="pager">
-                    <button class="ghost-button" :disabled="users.page === 0" @click="loadUsers(users.page - 1)">Назад</button>
-                    <span>Страница {{ users.page + 1 }} из {{ pageCount(users.totalPages) }}</span>
-                    <button class="ghost-button" :disabled="users.page + 1 >= users.totalPages" @click="loadUsers(users.page + 1)">Вперёд</button>
-                </div>
-            </section>
-
-            <section v-if="activeView === 'lab'" class="screen">
-                <div class="two-columns">
-                    <section class="panel">
-                        <div class="shelf-head">
-                            <h3>Фоновая задача</h3>
-                        </div>
-                        <div class="form-grid">
-                            <label>
-                                <span>Шагов</span>
-                                <input type="number" v-model.number="asyncForm.steps" min="1">
-                            </label>
-                            <label>
-                                <span>Задержка, мс</span>
-                                <input type="number" v-model.number="asyncForm.delayMillis" min="0">
-                            </label>
-                            <label>
-                                <span>Инкремент</span>
-                                <input type="number" v-model.number="asyncForm.incrementPerStep" min="1">
-                            </label>
-                        </div>
-                        <div class="hero-actions">
-                            <button class="primary-button" @click="startAsyncTask">Запустить</button>
-                            <button class="ghost-button" @click="refreshTaskStatus" :disabled="!asyncTask.taskId">Обновить</button>
-                        </div>
-                        <div class="json-card" v-if="asyncTask.status">
-                            <pre>{{ pretty(asyncTask.status) }}</pre>
-                        </div>
-                    </section>
-
-                    <section class="panel">
-                        <div class="shelf-head">
-                            <h3>Race condition</h3>
-                        </div>
-                        <div class="form-grid">
-                            <label>
-                                <span>Потоки</span>
-                                <input type="number" v-model.number="raceForm.threads" min="50">
-                            </label>
-                            <label>
-                                <span>Инкрементов на поток</span>
-                                <input type="number" v-model.number="raceForm.incrementsPerThread" min="1000">
-                            </label>
-                        </div>
-                        <div class="hero-actions">
-                            <button class="primary-button" @click="runRaceDemo">Запустить demo</button>
-                        </div>
-                        <div class="json-card" v-if="raceResult">
-                            <pre>{{ pretty(raceResult) }}</pre>
-                        </div>
-                    </section>
                 </div>
             </section>
         </main>

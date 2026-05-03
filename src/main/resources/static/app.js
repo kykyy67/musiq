@@ -81,8 +81,6 @@
                     { id: "tracks", label: "Треки" },
                     { id: "artists", label: "Артисты" },
                     { id: "genres", label: "Жанры" },
-                    { id: "users", label: "Пользователи" },
-                    { id: "lab", label: "Лаборатория" }
                 ]
             };
         },
