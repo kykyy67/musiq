@@ -27,17 +27,20 @@ public final class AlbumMapper {
                 ? List.of()
                 : album.getTracks().stream()
                 .map(t -> {
-                    Long trackArtistId = null;
-                    if (!artistIds.isEmpty()) {
-                        trackArtistId = artistIds.get(0);
-                    }
+                    Long trackArtistId = t.getArtist() != null
+                            ? t.getArtist().getId()
+                            : (artistIds.isEmpty() ? null : artistIds.get(0));
+                    Long trackGenreId = t.getGenre() != null
+                            ? t.getGenre().getId()
+                            : (genreIds.isEmpty() ? null : genreIds.get(0));
 
                     return new TrackResponse(
                             t.getId(),
                             t.getTitle(),
                             t.getDurationSeconds(),
                             album.getId(),
-                            trackArtistId
+                            trackArtistId,
+                            trackGenreId
                     );
                 })
                 .toList();

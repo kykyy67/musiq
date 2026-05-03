@@ -70,7 +70,6 @@ public class TrackService {
 
     @Transactional
     public Track create(String title, Integer durationSeconds, Long albumId, Long artistId, Long genreId) {
-                .orElseThrow(() -> new ResourceNotFoundException(ALBUM_WITH_ID + albumId + NOT_FOUND));
         Track track = Track.builder()
                 .title(title)
                 .durationSeconds(durationSeconds)
@@ -84,7 +83,12 @@ public class TrackService {
     }
 
     @Transactional
-    public Track update(Long id, String title, Integer durationSeconds, Long albumId) {
+    public Track update(Long id,
+                        String title,
+                        Integer durationSeconds,
+                        Long albumId,
+                        Long artistId,
+                        Long genreId) {
         Track existing = trackRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(TRACK_WITH_ID + id + NOT_FOUND));
         existing.setTitle(title);

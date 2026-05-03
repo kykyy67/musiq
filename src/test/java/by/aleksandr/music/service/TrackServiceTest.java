@@ -61,7 +61,7 @@ class TrackServiceTest {
         when(albumRepository.findById(7L)).thenReturn(Optional.of(album));
         when(trackRepository.save(any(Track.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Track created = trackService.create("Hysteria", 227, 7L);
+        Track created = trackService.create("Hysteria", 227, 7L, null, null);
 
         assertThat(created.getAlbum()).isSameAs(album);
         verify(albumSearchCache).invalidateAll();
@@ -71,7 +71,7 @@ class TrackServiceTest {
     void createShouldThrowWhenAlbumDoesNotExist() {
         when(albumRepository.findById(7L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> trackService.create("Hysteria", 227, 7L))
+        assertThatThrownBy(() -> trackService.create("Hysteria", 227, 7L, null, null))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Album with id 7 not found");
     }
@@ -84,7 +84,7 @@ class TrackServiceTest {
         when(albumRepository.findById(7L)).thenReturn(Optional.of(album));
         when(trackRepository.save(existing)).thenReturn(existing);
 
-        Track updated = trackService.update(9L, "Hysteria", 227, 7L);
+        Track updated = trackService.update(9L, "Hysteria", 227, 7L, null, null);
 
         assertThat(updated.getTitle()).isEqualTo("Hysteria");
         assertThat(updated.getDurationSeconds()).isEqualTo(227);
@@ -95,7 +95,7 @@ class TrackServiceTest {
     void updateShouldThrowWhenTrackDoesNotExist() {
         when(trackRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> trackService.update(99L, "Hysteria", 227, 7L))
+        assertThatThrownBy(() -> trackService.update(99L, "Hysteria", 227, 7L, null, null))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Track with id 99 not found");
     }
@@ -106,7 +106,7 @@ class TrackServiceTest {
         when(trackRepository.findById(9L)).thenReturn(Optional.of(existing));
         when(albumRepository.findById(7L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> trackService.update(9L, "Hysteria", 227, 7L))
+        assertThatThrownBy(() -> trackService.update(9L, "Hysteria", 227, 7L, null, null))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Album with id 7 not found");
     }
