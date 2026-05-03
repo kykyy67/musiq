@@ -564,14 +564,20 @@ label span {
     margin-top: auto;
     padding-top: 18px;
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
 }
 
 .album-bottom-actions {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: flex-end;
+}
+
+.album-tracks-button {
+    align-self: flex-end;
 }
 
 .card-head {
@@ -851,10 +857,6 @@ label span {
 
     .album-edit-button {
         margin-left: 0;
-    }
-
-    .album-center-row {
-        justify-content: flex-start;
     }
 
     .album-cover.large {

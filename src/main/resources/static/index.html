@@ -118,14 +118,6 @@
                             <span>Название</span>
                             <input v-model.trim="albumFilters.title" @keyup.enter="loadAlbums(0)" placeholder="Найти альбом">
                         </label>
-                        <label>
-                            <span>Жанр</span>
-                            <input v-model.trim="albumFilters.genreName" @keyup.enter="loadAlbums(0)" placeholder="Например, rock">
-                        </label>
-                        <label>
-                            <span>Трек</span>
-                            <input v-model.trim="albumFilters.trackTitle" @keyup.enter="loadAlbums(0)" placeholder="По названию трека">
-                        </label>
                     </div>
                     <div class="toolbar-actions">
                         <button class="ghost-button" @click="resetAlbumFilters">Сбросить</button>
@@ -149,10 +141,6 @@
                                     <button class="small-button album-edit-button" @click="openEdit('album', album)">Изменить</button>
                                 </div>
 
-                                <div class="album-center-row">
-                                    <button class="small-button album-center-button" @click="openAlbumTracksModal(album)">Треки</button>
-                                </div>
-
                                 <div class="album-main-info">
                                     <div class="info-block">
                                         <span class="info-title">Исполнители</span>
@@ -167,6 +155,7 @@
                                 </div>
 
                                 <div class="album-bottom-row">
+                                    <button class="small-button album-tracks-button" @click="openAlbumTracksModal(album)">Треки</button>
                                     <div class="album-bottom-actions">
                                         <button class="small-button" @click="openTrackForAlbum(album)">Добавить трек</button>
                                         <button class="small-button danger" @click="removeEntity('album', album.id, album.title)">Удалить</button>
