@@ -72,8 +72,9 @@ public class ConcurrencyController {
     @Operation(summary = "Demonstrate race condition and fixes")
     @PostMapping("/race-demo")
     public RaceConditionDemoResponse raceDemo(
-            @RequestParam(defaultValue = "64") @Min(50) @Max(500) int threadCount,
-            @RequestParam(defaultValue = "5000") @Min(1_000) @Max(100_000) int iterationsPerThread) {
+            @RequestParam(name = "threads", defaultValue = "64") @Min(50) @Max(500) int threadCount,
+            @RequestParam(name = "incrementsPerThread", defaultValue = "5000")
+            @Min(1_000) @Max(100_000) int iterationsPerThread) {
         return raceConditionDemoService.runDemo(threadCount, iterationsPerThread);
     }
 }

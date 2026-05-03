@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class RaceConditionDemoService {
 
     public RaceConditionDemoResponse runDemo(int threadCount, int iterationsPerThread) {
-        PlainCounter unsafeCounter = new PlainCounter();
+        UnsafeCounter unsafeCounter = new UnsafeCounter();
         AtomicInteger atomicCounter = new AtomicInteger();
         SynchronizedCounter synchronizedCounter = new SynchronizedCounter();
         int expectedTotal = threadCount * iterationsPerThread;
@@ -67,15 +67,11 @@ public class RaceConditionDemoService {
         }
     }
 
-    private static final class PlainCounter {
+    private static final class UnsafeCounter {
         private int value;
 
         private void increment() {
-            int current = value;
-            if ((current & 127) == 0) {
-                Thread.yield();
-            }
-            value = current + 1;
+            value++;
         }
 
         private int get() {
