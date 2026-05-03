@@ -68,6 +68,16 @@ class TrackServiceTest {
     }
 
     @Test
+    void createShouldAllowTrackWithoutAlbum() {
+        when(trackRepository.save(any(Track.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Track created = trackService.create("Hysteria", 227, null, null, null);
+
+        assertThat(created.getAlbum()).isNull();
+        verify(albumSearchCache).invalidateAll();
+    }
+
+    @Test
     void createShouldThrowWhenAlbumDoesNotExist() {
         when(albumRepository.findById(7L)).thenReturn(Optional.empty());
 
