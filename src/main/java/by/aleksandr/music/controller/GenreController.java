@@ -2,13 +2,14 @@ package by.aleksandr.music.controller;
 
 import by.aleksandr.music.dto.request.GenreRequest;
 import by.aleksandr.music.dto.response.GenreResponse;
+import by.aleksandr.music.dto.response.PagedResponse;
 import by.aleksandr.music.exception.ResourceNotFoundException;
 import by.aleksandr.music.mapper.GenreMapper;
 import by.aleksandr.music.service.GenreService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -32,9 +33,10 @@ public class GenreController {
 
     @Operation(summary = "Get genres")
     @GetMapping
-    public List<GenreResponse> getAll(
-            @RequestParam(name = "name", required = false) String name) {
-        return GenreMapper.toResponseList(genreService.findByName(name));
+    public PagedResponse<GenreResponse> getAll(
+            @RequestParam(name = "name", required = false) String name,
+            Pageable pageable) {
+        return genreService.findPage(name, pageable);
     }
 
     @Operation(summary = "Get genre by id")

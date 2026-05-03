@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Flow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div id="app" v-cloak>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-mark"></div>
+                <div>
+                    <span class="logo-kicker">music service</span>
+                    <strong>Music Flow</strong>
+                </div>
+            </div>
+
+            <nav class="menu">
+                <button
+                        v-for="item in navItems"
+                        :key="item.id"
+                        class="menu-item"
+                        :class="{ active: activeView === item.id }"
+                        @click="navigate(item.id)">
+                    <span>{{ item.label }}</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-note">
+                <p>Один интерфейс для всего каталога: альбомы, треки, артисты, жанры, пользователи и отдельный раздел для лабораторной части.</p>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="topbar">
+                <div>
+                    <p class="section-kicker">{{ currentViewMeta.kicker }}</p>
+                    <h1>{{ currentViewMeta.title }}</h1>
+                    <p class="section-copy">{{ currentViewMeta.copy }}</p>
+                </div>
+                <div class="topbar-stats">
+                    <div class="topbar-stat">
+                        <span>Альбомы</span>
+                        <strong>{{ dashboard.albums }}</strong>
+                    </div>
+                    <div class="topbar-stat">
+                        <span>Треки</span>
+                        <strong>{{ dashboard.tracks }}</strong>
+                    </div>
+                    <div class="topbar-stat">
+                        <span>Артисты</span>
+                        <strong>{{ dashboard.artists }}</strong>
+                    </div>
+                </div>
+            </header>
+
+            <section v-if="activeView === 'home'" class="screen">
+                <div class="hero-card">
+                    <div>
+                        <p class="section-kicker">подборка</p>
+                        <h2>{{ featuredAlbum ? featuredAlbum.title : 'Твоя музыкальная библиотека' }}</h2>
+                        <p>
+                            {{ featuredAlbum
+                            ? `Год выпуска: ${featuredAlbum.releaseYear}. Внутри уже есть треки, исполнители и жанры, всё загружается автоматически.`
+                            : 'Здесь собран весь музыкальный каталог. Всё, что ты видишь, открывается и обновляется через сервер.' }}
+                        </p>
+                        <div class="hero-actions">
+                            <button class="primary-button" @click="navigate('albums')">Открыть альбомы</button>
+                            <button class="ghost-button" @click="navigate('tracks')">Смотреть треки</button>
+                        </div>
+                    </div>
+                    <div class="hero-badge">
+                        <span>всё на месте</span>
+                        <strong>каталог</strong>
+                    </div>
+                </div>
+
+                <div class="shelf">
+                    <div class="shelf-head">
+                        <h3>Альбомы</h3>
+                        <button class="link-button" @click="navigate('albums')">Все альбомы</button>
+                    </div>
+                    <div class="album-grid">
+                        <article class="album-card" v-for="album in albumsPreview" :key="album.id">
+                            <div class="album-cover">
+                                <span>{{ initials(album.title) }}</span>
+                            </div>
+                            <div class="album-meta">
+                                <h4>{{ album.title }}</h4>
+                                <p>{{ artistList(album.artistIds) }}</p>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <div class="two-columns">
+                    <section class="panel">
+                        <div class="shelf-head">
+                            <h3>Артисты</h3>
+                            <button class="link-button" @click="navigate('artists')">Все артисты</button>
+                        </div>
+                        <div class="people-list">
+                            <article class="person-row" v-for="artist in artistsPreview" :key="artist.id">
+                                <div class="avatar">{{ initials(artist.name) }}</div>
+                                <div>
+                                    <strong>{{ artist.name }}</strong>
+                                    <p>{{ albumList(artist.albumIds) }}</p>
+                                </div>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section class="panel">
+                        <div class="shelf-head">
+                            <h3>Жанры</h3>
+                            <button class="link-button" @click="navigate('genres')">Все жанры</button>
+                        </div>
+                        <div class="tag-grid">
+                            <button class="tag-card" v-for="genre in genresPreview" :key="genre.id" @click="openGenreFilter(genre.name)">
+                                <strong>{{ genre.name }}</strong>
+                                <span>{{ albumList(genre.albumIds) }}</span>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <section v-if="activeView === 'albums'" class="screen">
+                <div class="toolbar">
+                    <div class="toolbar-fields three">
+                        <label>
+                            <span>Название</span>
+                            <input v-model.trim="albumFilters.title" @keyup.enter="loadAlbums(0)" placeholder="Найти альбом">
+                        </label>
+                        <label>
+                            <span>Жанр</span>
+                            <input v-model.trim="albumFilters.genreName" @keyup.enter="loadAlbums(0)" placeholder="Например, rock">
+                        </label>
+                        <label>
+                            <span>Трек</span>
+                            <input v-model.trim="albumFilters.trackTitle" @keyup.enter="loadAlbums(0)" placeholder="По названию трека">
+                        </label>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="ghost-button" @click="resetAlbumFilters">Сбросить</button>
+                        <button class="primary-button" @click="loadAlbums(0)">Показать</button>
+                        <button class="secondary-button" @click="openCreate('album')">Новый альбом</button>
+                    </div>
+                </div>
+
+                <div class="catalog-grid">
+                    <article class="album-detail-card" v-for="album in albums.content" :key="album.id">
+                        <div class="album-cover large">
+                            <span>{{ initials(album.title) }}</span>
+                        </div>
+                        <div class="album-detail-body">
+                            <div class="card-head">
+                                <div>
+                                    <h3>{{ album.title }}</h3>
+                                    <p>{{ album.releaseYear }}</p>
+                                </div>
+                                <div class="inline-actions">
+                                    <button class="small-button" @click="openTrackForAlbum(album)">Добавить трек</button>
+                                    <button class="small-button" @click="openEdit('album', album)">Изменить</button>
+                                    <button class="small-button danger" @click="removeEntity('album', album.id, album.title)">Удалить</button>
+                                </div>
+                            </div>
+
+                            <div class="info-block">
+                                <span class="info-title">Исполнители</span>
+                                <div class="chip-row">
+                                    <span class="chip" v-for="artistId in album.artistIds" :key="'artist-' + artistId">{{ artistName(artistId) }}</span>
+                                </div>
+                            </div>
+
+                            <div class="chip-row">
+                                <span class="chip muted" v-for="genreId in album.genreIds" :key="genreId">{{ genreName(genreId) }}</span>
+                            </div>
+
+                            <div class="track-stack">
+                                <div class="track-line" v-for="track in album.tracks" :key="track.id">
+                                    <div>
+                                        <strong>{{ track.title }}</strong>
+                                        <span>{{ albumArtistList(track.albumId) }}</span>
+                                    </div>
+                                    <em>{{ formatDuration(track.durationSeconds) }}</em>
+                                </div>
+                                <div v-if="!album.tracks.length" class="empty-state small">В этом альбоме пока нет треков</div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="pager">
+                    <button class="ghost-button" :disabled="albums.page === 0" @click="loadAlbums(albums.page - 1)">Назад</button>
+                    <span>Страница {{ albums.page + 1 }} из {{ pageCount(albums.totalPages) }}</span>
+                    <button class="ghost-button" :disabled="albums.page + 1 >= albums.totalPages" @click="loadAlbums(albums.page + 1)">Вперёд</button>
+                </div>
+            </section>
+
+            <section v-if="activeView === 'tracks'" class="screen">
+                <div class="toolbar">
+                    <div class="toolbar-fields one">
+                        <label>
+                            <span>Трек</span>
+                            <input v-model.trim="trackFilters.title" @keyup.enter="loadTracks(0)" placeholder="Найти трек">
+                        </label>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="ghost-button" @click="resetTracks">Сбросить</button>
+                        <button class="primary-button" @click="loadTracks(0)">Показать</button>
+                        <button class="secondary-button" @click="openCreate('track')">Новый трек</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="track-list-view">
+                        <article class="track-list-row" v-for="track in tracks.content" :key="track.id">
+                            <div class="track-list-main">
+                                <div class="track-number">{{ trackSymbol(track.title) }}</div>
+                                <div>
+                                    <strong>{{ track.title }}</strong>
+                                    <p>{{ albumArtistList(track.albumId) }} · {{ albumTitle(track.albumId) }}</p>
+                                </div>
+                            </div>
+                            <div class="track-list-side">
+                                <span>{{ formatDuration(track.durationSeconds) }}</span>
+                                <button class="small-button" @click="openEdit('track', track)">Изменить</button>
+                                <button class="small-button danger" @click="removeEntity('track', track.id, track.title)">Удалить</button>
+                            </div>
+                        </article>
+                        <div v-if="!tracks.content.length" class="empty-state">Ничего не найдено</div>
+                    </div>
+                </div>
+
+                <div class="pager">
+                    <button class="ghost-button" :disabled="tracks.page === 0" @click="loadTracks(tracks.page - 1)">Назад</button>
+                    <span>Страница {{ tracks.page + 1 }} из {{ pageCount(tracks.totalPages) }}</span>
+                    <button class="ghost-button" :disabled="tracks.page + 1 >= tracks.totalPages" @click="loadTracks(tracks.page + 1)">Вперёд</button>
+                </div>
+            </section>
+
+            <section v-if="activeView === 'artists'" class="screen">
+                <div class="toolbar">
+                    <div class="toolbar-fields one">
+                        <label>
+                            <span>Артист</span>
+                            <input v-model.trim="artistFilters.name" @keyup.enter="loadArtists(0)" placeholder="Найти артиста">
+                        </label>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="ghost-button" @click="resetArtists">Сбросить</button>
+                        <button class="primary-button" @click="loadArtists(0)">Показать</button>
+                        <button class="secondary-button" @click="openCreate('artist')">Новый артист</button>
+                    </div>
+                </div>
+
+                <div class="tile-grid">
+                    <article class="entity-tile" v-for="artist in artists.content" :key="artist.id">
+                        <div class="avatar big">{{ initials(artist.name) }}</div>
+                        <h3>{{ artist.name }}</h3>
+                        <p>{{ albumList(artist.albumIds) }}</p>
+                        <div class="inline-actions centered">
+                            <button class="small-button" @click="openEdit('artist', artist)">Изменить</button>
+                            <button class="small-button danger" @click="removeEntity('artist', artist.id, artist.name)">Удалить</button>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="pager">
+                    <button class="ghost-button" :disabled="artists.page === 0" @click="loadArtists(artists.page - 1)">Назад</button>
+                    <span>Страница {{ artists.page + 1 }} из {{ pageCount(artists.totalPages) }}</span>
+                    <button class="ghost-button" :disabled="artists.page + 1 >= artists.totalPages" @click="loadArtists(artists.page + 1)">Вперёд</button>
+                </div>
+            </section>
+
+            <section v-if="activeView === 'genres'" class="screen">
+                <div class="toolbar">
+                    <div class="toolbar-fields one">
+                        <label>
+                            <span>Жанр</span>
+                            <input v-model.trim="genreFilters.name" @keyup.enter="loadGenres(0)" placeholder="Найти жанр">
+                        </label>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="ghost-button" @click="resetGenres">Сбросить</button>
+                        <button class="primary-button" @click="loadGenres(0)">Показать</button>
+                        <button class="secondary-button" @click="openCreate('genre')">Новый жанр</button>
+                    </div>
+                </div>
+
+                <div class="tile-grid">
+                    <article class="entity-tile genre" v-for="genre in genres.content" :key="genre.id">
+                        <h3>{{ genre.name }}</h3>
+                        <p>{{ albumList(genre.albumIds) }}</p>
+                        <div class="inline-actions centered">
+                            <button class="small-button" @click="openEdit('genre', genre)">Изменить</button>
+                            <button class="small-button danger" @click="removeEntity('genre', genre.id, genre.name)">Удалить</button>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="pager">
+                    <button class="ghost-button" :disabled="genres.page === 0" @click="loadGenres(genres.page - 1)">Назад</button>
+                    <span>Страница {{ genres.page + 1 }} из {{ pageCount(genres.totalPages) }}</span>
+                    <button class="ghost-button" :disabled="genres.page + 1 >= genres.totalPages" @click="loadGenres(genres.page + 1)">Вперёд</button>
+                </div>
+            </section>
+
+            <section v-if="activeView === 'users'" class="screen">
+                <div class="toolbar">
+                    <div class="toolbar-fields one">
+                        <label>
+                            <span>Пользователь</span>
+                            <input v-model.trim="userFilters.name" @keyup.enter="loadUsers(0)" placeholder="Найти пользователя">
+                        </label>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="ghost-button" @click="resetUsers">Сбросить</button>
+                        <button class="primary-button" @click="loadUsers(0)">Показать</button>
+                        <button class="secondary-button" @click="openCreate('user')">Новый пользователь</button>
+                    </div>
+                </div>
+
+                <div class="tile-grid">
+                    <article class="entity-tile" v-for="user in users.content" :key="user.id">
+                        <div class="avatar big">{{ initials(user.name) }}</div>
+                        <h3>{{ user.name }}</h3>
+                        <p>{{ trackList(user.trackIds) }}</p>
+                        <div class="inline-actions centered">
+                            <button class="small-button" @click="openEdit('user', user)">Изменить</button>
+                            <button class="small-button danger" @click="removeEntity('user', user.id, user.name)">Удалить</button>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="pager">
+                    <button class="ghost-button" :disabled="users.page === 0" @click="loadUsers(users.page - 1)">Назад</button>
+                    <span>Страница {{ users.page + 1 }} из {{ pageCount(users.totalPages) }}</span>
+                    <button class="ghost-button" :disabled="users.page + 1 >= users.totalPages" @click="loadUsers(users.page + 1)">Вперёд</button>
+                </div>
+            </section>
+
+            <section v-if="activeView === 'lab'" class="screen">
+                <div class="two-columns">
+                    <section class="panel">
+                        <div class="shelf-head">
+                            <h3>Фоновая задача</h3>
+                        </div>
+                        <div class="form-grid">
+                            <label>
+                                <span>Шагов</span>
+                                <input type="number" v-model.number="asyncForm.steps" min="1">
+                            </label>
+                            <label>
+                                <span>Задержка, мс</span>
+                                <input type="number" v-model.number="asyncForm.delayMillis" min="0">
+                            </label>
+                            <label>
+                                <span>Инкремент</span>
+                                <input type="number" v-model.number="asyncForm.incrementPerStep" min="1">
+                            </label>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="primary-button" @click="startAsyncTask">Запустить</button>
+                            <button class="ghost-button" @click="refreshTaskStatus" :disabled="!asyncTask.taskId">Обновить</button>
+                        </div>
+                        <div class="json-card" v-if="asyncTask.status">
+                            <pre>{{ pretty(asyncTask.status) }}</pre>
+                        </div>
+                    </section>
+
+                    <section class="panel">
+                        <div class="shelf-head">
+                            <h3>Race condition</h3>
+                        </div>
+                        <div class="form-grid">
+                            <label>
+                                <span>Потоки</span>
+                                <input type="number" v-model.number="raceForm.threads" min="50">
+                            </label>
+                            <label>
+                                <span>Инкрементов на поток</span>
+                                <input type="number" v-model.number="raceForm.incrementsPerThread" min="1000">
+                            </label>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="primary-button" @click="runRaceDemo">Запустить demo</button>
+                        </div>
+                        <div class="json-card" v-if="raceResult">
+                            <pre>{{ pretty(raceResult) }}</pre>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="modal-backdrop" v-if="modal.open" @click.self="closeModal">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <p class="section-kicker">{{ modal.mode === 'create' ? 'создание' : 'редактирование' }}</p>
+                    <h3>{{ modalTitle }}</h3>
+                </div>
+                <button class="ghost-button" @click="closeModal">Закрыть</button>
+            </div>
+
+            <form class="modal-form" @submit.prevent="submitModal">
+                <template v-if="modal.type === 'album'">
+                    <label>
+                        <span>Название альбома</span>
+                        <input v-model.trim="modal.form.title" required maxlength="255">
+                    </label>
+                    <label>
+                        <span>Год выпуска</span>
+                        <input type="number" v-model.number="modal.form.releaseYear" min="1900" max="2100" required>
+                    </label>
+                    <label>
+                        <span>Исполнители</span>
+                        <div class="selector-list">
+                            <label class="selector-item" v-for="artist in reference.artists" :key="artist.id">
+                                <input type="checkbox" :value="artist.id" v-model="modal.form.artistIds">
+                                <span>{{ artist.name }}</span>
+                            </label>
+                        </div>
+                    </label>
+                    <label>
+                        <span>Жанры</span>
+                        <div class="selector-list">
+                            <label class="selector-item" v-for="genre in reference.genres" :key="genre.id">
+                                <input type="checkbox" :value="genre.id" v-model="modal.form.genreIds">
+                                <span>{{ genre.name }}</span>
+                            </label>
+                        </div>
+                    </label>
+                </template>
+
+                <template v-else-if="modal.type === 'track'">
+                    <label>
+                        <span>Название трека</span>
+                        <input v-model.trim="modal.form.title" required maxlength="255">
+                    </label>
+                    <label>
+                        <span>Длительность, сек.</span>
+                        <input type="number" v-model.number="modal.form.durationSeconds" min="1" required>
+                    </label>
+                    <label>
+                        <span>Альбом</span>
+                        <select v-model.number="modal.form.albumId" required>
+                            <option disabled value="">Выбери альбом</option>
+                            <option v-for="album in reference.albums" :key="album.id" :value="album.id">{{ album.title }}</option>
+                        </select>
+                    </label>
+                    <div class="info-block">
+                        <span class="info-title">Исполнители альбома</span>
+                        <div class="chip-row">
+                            <span class="chip" v-for="name in selectedTrackArtistNames" :key="name">{{ name }}</span>
+                            <span v-if="!selectedTrackArtistNames.length" class="empty-state small">Сначала выбери альбом</span>
+                        </div>
+                    </div>
+                </template>
+
+                <template v-else-if="modal.type === 'artist'">
+                    <label>
+                        <span>Имя артиста</span>
+                        <input v-model.trim="modal.form.name" required maxlength="255">
+                    </label>
+                </template>
+
+                <template v-else-if="modal.type === 'genre'">
+                    <label>
+                        <span>Название жанра</span>
+                        <input v-model.trim="modal.form.name" required maxlength="100">
+                    </label>
+                </template>
+
+                <template v-else-if="modal.type === 'user'">
+                    <label>
+                        <span>Имя пользователя</span>
+                        <input v-model.trim="modal.form.name" required maxlength="255">
+                    </label>
+                    <label>
+                        <span>Любимые треки</span>
+                        <div class="selector-list">
+                            <label class="selector-item" v-for="track in reference.tracks" :key="track.id">
+                                <input type="checkbox" :value="track.id" v-model="modal.form.trackIds">
+                                <span>{{ track.title }}</span>
+                            </label>
+                        </div>
+                    </label>
+                </template>
+
+                <div class="hero-actions">
+                    <button class="primary-button" type="submit">{{ modal.mode === 'create' ? 'Сохранить' : 'Обновить' }}</button>
+                    <button class="ghost-button" type="button" @click="closeModal">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" v-if="toast">{{ toast }}</div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

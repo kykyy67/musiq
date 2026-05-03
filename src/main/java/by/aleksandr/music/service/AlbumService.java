@@ -52,6 +52,20 @@ public class AlbumService {
         return getAlbumsByTitle(title);
     }
 
+    public PagedResponse<AlbumResponse> getAlbumsPage(String title, Pageable pageable) {
+        Page<Album> page = (title == null || title.isBlank())
+                ? albumRepository.findAll(pageable)
+                : albumRepository.findByTitleContainingIgnoreCase(title, pageable);
+
+        return new PagedResponse<>(
+                page.getContent().stream().map(AlbumMapper::toResponse).toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+    }
+
     public java.util.Optional<Album> getAlbumById(Long id) {
         return albumRepository.findWithEntityGraphById(id);
     }

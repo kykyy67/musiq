@@ -2,10 +2,13 @@ package by.aleksandr.music.service;
 
 import by.aleksandr.music.cache.AlbumSearchCache;
 import by.aleksandr.music.dto.request.BulkTrackItemRequest;
+import by.aleksandr.music.dto.response.PagedResponse;
+import by.aleksandr.music.dto.response.TrackResponse;
 import by.aleksandr.music.entity.Album;
 import by.aleksandr.music.entity.Track;
 import by.aleksandr.music.exception.BadRequestException;
 import by.aleksandr.music.exception.ResourceNotFoundException;
+import by.aleksandr.music.mapper.TrackMapper;
 import by.aleksandr.music.repository.AlbumRepository;
 import by.aleksandr.music.repository.TrackRepository;
 import java.util.Comparator;
@@ -13,6 +16,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +42,20 @@ public class TrackService {
             return findAll();
         }
         return trackRepository.findByTitleContainingIgnoreCase(title);
+    }
+
+    public PagedResponse<TrackResponse> findPage(String title, Pageable pageable) {
+        Page<Track> page = (title == null || title.isBlank())
+                ? trackRepository.findAll(pageable)
+                : trackRepository.findByTitleContainingIgnoreCase(title, pageable);
+
+        return new PagedResponse<>(
+                page.getContent().stream().map(TrackMapper::toResponse).toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
     public Optional<Track> findById(Long id) {

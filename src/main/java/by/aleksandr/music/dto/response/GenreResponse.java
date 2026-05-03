@@ -1,6 +1,7 @@
 package by.aleksandr.music.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,4 +17,7 @@ public class GenreResponse {
 
     @Schema(description = "Genre name", example = "Alternative Rock")
     private String name;
+
+    @Schema(description = "Album identifiers associated with the genre")
+    private List<Long> albumIds;
 }

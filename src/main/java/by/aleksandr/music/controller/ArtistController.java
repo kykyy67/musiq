@@ -3,13 +3,14 @@ package by.aleksandr.music.controller;
 import by.aleksandr.music.dto.request.ArtistRequest;
 import by.aleksandr.music.dto.request.ArtistWithAlbumAndTracksRequest;
 import by.aleksandr.music.dto.response.ArtistResponse;
+import by.aleksandr.music.dto.response.PagedResponse;
 import by.aleksandr.music.exception.ResourceNotFoundException;
 import by.aleksandr.music.mapper.ArtistMapper;
 import by.aleksandr.music.service.ArtistService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -33,9 +34,10 @@ public class ArtistController {
 
     @Operation(summary = "Get artists")
     @GetMapping
-    public List<ArtistResponse> getAll(
-            @RequestParam(name = "name", required = false) String name) {
-        return ArtistMapper.toResponseList(artistService.findByName(name));
+    public PagedResponse<ArtistResponse> getAll(
+            @RequestParam(name = "name", required = false) String name,
+            Pageable pageable) {
+        return artistService.findPage(name, pageable);
     }
 
     @Operation(summary = "Get artist by id")

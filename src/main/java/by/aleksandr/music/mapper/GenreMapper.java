@@ -14,7 +14,10 @@ public final class GenreMapper {
         if (genre == null) {
             return null;
         }
-        return new GenreResponse(genre.getId(), genre.getName());
+        List<Long> albumIds = genre.getAlbums() == null
+                ? List.of()
+                : genre.getAlbums().stream().map(album -> album.getId()).toList();
+        return new GenreResponse(genre.getId(), genre.getName(), albumIds);
     }
 
     public static List<GenreResponse> toResponseList(List<Genre> genres) {

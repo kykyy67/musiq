@@ -2,11 +2,13 @@ package by.aleksandr.music.service;
 
 import by.aleksandr.music.cache.AlbumSearchCache;
 import by.aleksandr.music.dto.request.ArtistWithAlbumAndTracksRequest;
+import by.aleksandr.music.dto.response.ArtistResponse;
 import by.aleksandr.music.entity.Album;
 import by.aleksandr.music.entity.Artist;
 import by.aleksandr.music.entity.Track;
 import by.aleksandr.music.exception.BadRequestException;
 import by.aleksandr.music.exception.ResourceNotFoundException;
+import by.aleksandr.music.mapper.ArtistMapper;
 import by.aleksandr.music.repository.AlbumRepository;
 import by.aleksandr.music.repository.ArtistRepository;
 import by.aleksandr.music.repository.TrackRepository;
@@ -14,6 +16,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +39,20 @@ public class ArtistService {
             return findAll();
         }
         return artistRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    public by.aleksandr.music.dto.response.PagedResponse<ArtistResponse> findPage(String name, Pageable pageable) {
+        Page<Artist> page = (name == null || name.isBlank())
+                ? artistRepository.findAll(pageable)
+                : artistRepository.findByNameContainingIgnoreCase(name, pageable);
+
+        return new by.aleksandr.music.dto.response.PagedResponse<>(
+                page.getContent().stream().map(ArtistMapper::toResponse).toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
     public Optional<Artist> findById(Long id) {

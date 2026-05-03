@@ -2,6 +2,7 @@ package by.aleksandr.music.controller;
 
 import by.aleksandr.music.dto.request.BulkTrackItemRequest;
 import by.aleksandr.music.dto.request.TrackRequest;
+import by.aleksandr.music.dto.response.PagedResponse;
 import by.aleksandr.music.dto.response.TrackResponse;
 import by.aleksandr.music.exception.ResourceNotFoundException;
 import by.aleksandr.music.mapper.TrackMapper;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -34,9 +36,10 @@ public class TrackController {
 
     @Operation(summary = "Get tracks")
     @GetMapping
-    public List<TrackResponse> getAll(
-            @RequestParam(name = "title", required = false) String title) {
-        return TrackMapper.toResponseList(trackService.findByTitle(title));
+    public PagedResponse<TrackResponse> getAll(
+            @RequestParam(name = "title", required = false) String title,
+            Pageable pageable) {
+        return trackService.findPage(title, pageable);
     }
 
     @Operation(summary = "Get track by id")

@@ -1,10 +1,13 @@
 package by.aleksandr.music.service;
 
 import by.aleksandr.music.cache.AlbumSearchCache;
+import by.aleksandr.music.dto.response.PagedResponse;
+import by.aleksandr.music.dto.response.UserResponse;
 import by.aleksandr.music.entity.Track;
 import by.aleksandr.music.entity.User;
 import by.aleksandr.music.exception.BadRequestException;
 import by.aleksandr.music.exception.ResourceNotFoundException;
+import by.aleksandr.music.mapper.UserMapper;
 import by.aleksandr.music.repository.TrackRepository;
 import by.aleksandr.music.repository.UserRepository;
 import java.util.ArrayList;
@@ -12,6 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +37,20 @@ public class UserService {
             return findAll();
         }
         return userRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    public PagedResponse<UserResponse> findPage(String name, Pageable pageable) {
+        Page<User> page = (name == null || name.isBlank())
+                ? userRepository.findAll(pageable)
+                : userRepository.findByNameContainingIgnoreCase(name, pageable);
+
+        return new PagedResponse<>(
+                page.getContent().stream().map(UserMapper::toResponse).toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
     public Optional<User> findById(Long id) {

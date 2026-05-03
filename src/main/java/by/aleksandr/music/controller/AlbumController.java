@@ -38,9 +38,10 @@ public class AlbumController {
 
     @Operation(summary = "Get albums", description = "Returns all albums or filters them by title.")
     @GetMapping
-    public List<AlbumResponse> getAlbums(
-            @RequestParam(name = "title", required = false) String title) {
-        return AlbumMapper.toResponseList(albumService.getAlbumsByTitleWithArtistAndGenres(title));
+    public PagedResponse<AlbumResponse> getAlbums(
+            @RequestParam(name = "title", required = false) String title,
+            Pageable pageable) {
+        return albumService.getAlbumsPage(title, pageable);
     }
 
     @Operation(summary = "Search albums", description = "Searches albums by genre and track title with pagination.")

@@ -14,7 +14,10 @@ public final class ArtistMapper {
         if (artist == null) {
             return null;
         }
-        return new ArtistResponse(artist.getId(), artist.getName());
+        List<Long> albumIds = artist.getAlbums() == null
+                ? List.of()
+                : artist.getAlbums().stream().map(album -> album.getId()).toList();
+        return new ArtistResponse(artist.getId(), artist.getName(), albumIds);
     }
 
     public static List<ArtistResponse> toResponseList(List<Artist> artists) {

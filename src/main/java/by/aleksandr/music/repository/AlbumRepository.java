@@ -19,6 +19,12 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     List<Album> findByTitleContainingIgnoreCase(String title);
 
     @EntityGraph(attributePaths = {"artists", "genres", "tracks"})
+    Page<Album> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"artists", "genres", "tracks"})
+    Page<Album> findAll(Pageable pageable);
+
+    @EntityGraph(attributePaths = {"artists", "genres", "tracks"})
     Optional<Album> findWithEntityGraphById(Long id);
 
     @EntityGraph(attributePaths = {"tracks", "tracks.users", "tracks.users.tracks"})
