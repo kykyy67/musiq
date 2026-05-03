@@ -71,7 +71,12 @@
                     mode: "create",
                     type: "",
                     id: null,
-                    form: {}
+                    form: {},
+                    trackSelector: {
+                        album: false,
+                        artist: false,
+                        genre: false
+                    }
                 },
                 asyncForm: {
                     steps: 8,
@@ -526,6 +531,7 @@
                 this.modal.type = type;
                 this.modal.id = null;
                 this.modal.form = this.emptyForm(type);
+                this.resetTrackSelectors();
             },
             openTrackForAlbum(album) {
                 this.modal.open = true;
@@ -535,8 +541,11 @@
                 this.modal.form = {
                     title: "",
                     durationSeconds: 180,
-                    albumId: album.id
+                    albumId: album.id,
+                    artistId: "",
+                    genreId: ""
                 };
+                this.resetTrackSelectors();
             },
             openEdit(type, item) {
                 this.modal.open = true;
@@ -550,6 +559,20 @@
                 this.modal.type = "";
                 this.modal.id = null;
                 this.modal.form = {};
+                this.resetTrackSelectors();
+            },
+            resetTrackSelectors() {
+                this.modal.trackSelector = {
+                    album: false,
+                    artist: false,
+                    genre: false
+                };
+            },
+            toggleTrackSelector(field) {
+                if (this.modal.type !== "track") {
+                    return;
+                }
+                this.modal.trackSelector[field] = !this.modal.trackSelector[field];
             },
             normalizedPayload(type, form) {
                 if (type === "album") {
