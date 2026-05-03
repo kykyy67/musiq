@@ -340,8 +340,8 @@
                         <button type="button" class="ghost-button" @click="toggleTrackSelector('album')">
                             {{ modal.form.albumId ? albumTitle(modal.form.albumId) : 'Пусто' }}
                         </button>
-                        <select v-if="modal.trackSelector.album" v-model.number="modal.form.albumId" size="8">
-                            <option value="">Без альбома</option>
+                        <select v-model="modal.form.albumId">
+                            <option value="">Без альбома (необязательно)</option>
                             <option v-for="album in reference.albums" :key="album.id" :value="album.id">{{ album.title }}</option>
                         </select>
                     </label>
