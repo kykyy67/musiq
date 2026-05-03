@@ -138,7 +138,7 @@
                                         <h3>{{ album.title }}</h3>
                                         <p>{{ album.releaseYear }}</p>
                                     </div>
-                                    <button class="small-button album-edit-button" @click="openEdit('album', album)">Изменить</button>
+                                    <button class="small-button album-edit-button" @click="openEdit('album', album)" title="Изменить" aria-label="Изменить">✏️</button>
                                 </div>
 
                                 <div class="album-main-info">
@@ -158,7 +158,7 @@
                                     <button class="small-button album-tracks-button" @click="openAlbumTracksModal(album)">Треки</button>
                                     <div class="album-bottom-actions">
                                         <button class="small-button" @click="openTrackForAlbum(album)">Добавить трек</button>
-                                        <button class="small-button danger" @click="removeEntity('album', album.id, album.title)">Удалить</button>
+                                        <button class="small-button danger" @click="removeEntity('album', album.id, album.title)" title="Удалить" aria-label="Удалить">🗑️</button>
                                     </div>
                                 </div>
                             </div>
@@ -200,8 +200,8 @@
                             </div>
                             <div class="track-list-side">
                                 <span>{{ formatDuration(track.durationSeconds) }}</span>
-                                <button class="small-button" @click="openEdit('track', track)">Изменить</button>
-                                <button class="small-button danger" @click="removeEntity('track', track.id, track.title)">Удалить</button>
+                                <button class="small-button" @click="openEdit('track', track)" title="Изменить" aria-label="Изменить">✏️</button>
+                                <button class="small-button danger" @click="removeEntity('track', track.id, track.title)" title="Удалить" aria-label="Удалить">🗑️</button>
                             </div>
                         </article>
                         <div v-if="!tracks.content.length" class="empty-state">Ничего не найдено</div>
@@ -237,8 +237,8 @@
                         <p>{{ artistAlbumPreview(artist.albumIds) }}</p>
                         <div class="inline-actions">
                             <button class="small-button" @click="openArtistAlbumsModal(artist)">Все альбомы</button>
-                            <button class="small-button" @click="openEdit('artist', artist)">Изменить</button>
-                            <button class="small-button danger" @click="removeEntity('artist', artist.id, artist.name)">Удалить</button>
+                            <button class="small-button" @click="openEdit('artist', artist)" title="Изменить" aria-label="Изменить">✏️</button>
+                            <button class="small-button danger" @click="removeEntity('artist', artist.id, artist.name)" title="Удалить" aria-label="Удалить">🗑️</button>
                         </div>
                     </article>
                 </div>
@@ -271,8 +271,8 @@
                         <p>{{ genreAlbumPreview(genre.albumIds) }}</p>
                         <div class="inline-actions">
                             <button class="small-button" @click="openGenreAlbumsModal(genre)">Все альбомы</button>
-                            <button class="small-button" @click="openEdit('genre', genre)">Изменить</button>
-                            <button class="small-button danger" @click="removeEntity('genre', genre.id, genre.name)">Удалить</button>
+                            <button class="small-button" @click="openEdit('genre', genre)" title="Изменить" aria-label="Изменить">✏️</button>
+                            <button class="small-button danger" @click="removeEntity('genre', genre.id, genre.name)" title="Удалить" aria-label="Удалить">🗑️</button>
                         </div>
                     </article>
                 </div>
