@@ -698,6 +698,21 @@ label span {
     text-align: left;
 }
 
+.artist-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.entity-tile.artist-tile .artist-title-row .avatar.big {
+    margin: 0;
+}
+
+.entity-tile.artist-tile .artist-title-row h3 {
+    margin: 0;
+}
+
 .entity-tile.artist-tile .inline-actions {
     justify-content: flex-start;
 }

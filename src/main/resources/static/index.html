@@ -232,8 +232,10 @@
 
                 <div class="tile-grid">
                     <article class="entity-tile artist-tile" v-for="artist in artists.content" :key="artist.id">
-                        <div class="avatar big">{{ initials(artist.name) }}</div>
-                        <h3>{{ artist.name }}</h3>
+                        <div class="artist-title-row">
+                            <div class="avatar big">{{ initials(artist.name) }}</div>
+                            <h3>{{ artist.name }}</h3>
+                        </div>
                         <p>{{ artistAlbumPreview(artist.albumIds) }}</p>
                         <div class="inline-actions tile-row-actions">
                             <button class="small-button" @click="openArtistAlbumsModal(artist)">Все альбомы</button>
