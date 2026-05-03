@@ -337,30 +337,30 @@
                     </label>
                     <label>
                         <span>Альбом</span>
-                        <button type="button" class="ghost-button" @click="toggleTrackSelector('album')">
-                            {{ modal.form.albumId ? albumTitle(modal.form.albumId) : 'Пусто' }}
+                        <button type="button" class="selector-trigger" @click="toggleTrackSelector('album')">
+                            {{ modal.form.albumId ? albumTitle(modal.form.albumId) : 'Не выбран' }}
                         </button>
-                        <select v-model="modal.form.albumId">
+                        <select v-if="modal.trackSelector.album" v-model.number="modal.form.albumId" size="5">
                             <option value="">Без альбома (необязательно)</option>
                             <option v-for="album in reference.albums" :key="album.id" :value="album.id">{{ album.title }}</option>
                         </select>
                     </label>
                     <label>
                         <span>Исполнитель</span>
-                        <button type="button" class="ghost-button" @click="toggleTrackSelector('artist')">
-                            {{ modal.form.artistId ? artistName(modal.form.artistId) : 'Пусто' }}
+                        <button type="button" class="selector-trigger" @click="toggleTrackSelector('artist')">
+                            {{ modal.form.artistId ? artistName(modal.form.artistId) : 'Не выбран' }}
                         </button>
-                        <select v-if="modal.trackSelector.artist" v-model.number="modal.form.artistId" size="6">
+                        <select v-if="modal.trackSelector.artist" v-model.number="modal.form.artistId" size="5">
                             <option value="">Не выбран</option>
                             <option v-for="artist in reference.artists" :key="artist.id" :value="artist.id">{{ artist.name }}</option>
                         </select>
                     </label>
                     <label>
                         <span>Жанр</span>
-                        <button type="button" class="ghost-button" @click="toggleTrackSelector('genre')">
-                            {{ modal.form.genreId ? genreName(modal.form.genreId) : 'Пусто' }}
+                        <button type="button" class="selector-trigger" @click="toggleTrackSelector('genre')">
+                            {{ modal.form.genreId ? genreName(modal.form.genreId) : 'Не выбран' }}
                         </button>
-                        <select v-if="modal.trackSelector.genre" v-model.number="modal.form.genreId" size="6">
+                        <select v-if="modal.trackSelector.genre" v-model.number="modal.form.genreId" size="5">
                             <option value="">Не выбран</option>
                             <option v-for="genre in reference.genres" :key="genre.id" :value="genre.id">{{ genre.name }}</option>
                         </select>

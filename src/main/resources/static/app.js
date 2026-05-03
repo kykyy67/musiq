@@ -572,7 +572,13 @@
                 if (this.modal.type !== "track") {
                     return;
                 }
-                this.modal.trackSelector[field] = !this.modal.trackSelector[field];
+                const next = !this.modal.trackSelector[field];
+                this.modal.trackSelector = {
+                    album: false,
+                    artist: false,
+                    genre: false
+                };
+                this.modal.trackSelector[field] = next;
             },
             normalizedPayload(type, form) {
                 if (type === "album") {
@@ -584,12 +590,16 @@
                     };
                 }
                 if (type === "track") {
+                    const toNullableId = (value) => {
+                        const parsed = Number(value);
+                        return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+                    };
                     return {
                         title: form.title,
                         durationSeconds: Number(form.durationSeconds),
-                        albumId: form.albumId ? Number(form.albumId) : null,
-                        artistId: form.artistId ? Number(form.artistId) : null,
-                        genreId: form.genreId ? Number(form.genreId) : null
+                        albumId: toNullableId(form.albumId),
+                        artistId: toNullableId(form.artistId),
+                        genreId: toNullableId(form.genreId)
                     };
                 }
                 if (type === "user") {

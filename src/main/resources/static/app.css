@@ -781,6 +781,20 @@ label span {
     gap: 16px;
 }
 
+.selector-trigger {
+    width: 100%;
+    text-align: left;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    padding: 14px 16px;
+}
+
+.selector-trigger:hover {
+    border-color: rgba(255, 204, 51, 0.6);
+}
+
 .selector-list {
     max-height: 220px;
     overflow: auto;
