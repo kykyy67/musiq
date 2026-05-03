@@ -149,8 +149,11 @@
                                         </div>
                                     </div>
 
-                                    <div class="chip-row">
-                                        <span class="chip muted" v-for="genreId in album.genreIds" :key="genreId">{{ genreName(genreId) }}</span>
+                                    <div class="info-block">
+                                        <span class="info-title">Жанры</span>
+                                        <div class="chip-row">
+                                            <span class="chip muted" v-for="genreId in album.genreIds" :key="genreId">{{ genreName(genreId) }}</span>
+                                        </div>
                                     </div>
                                 </div>
 

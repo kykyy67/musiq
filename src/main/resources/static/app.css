@@ -393,7 +393,10 @@ input[type="checkbox"] {
 }
 
 .album-cover.large {
-    height: 210px;
+    height: 100%;
+    min-height: 100%;
+    min-width: 210px;
+    border-radius: 0;
     min-width: 210px;
 }
 
