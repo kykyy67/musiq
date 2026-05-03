@@ -195,7 +195,7 @@
                                 <div class="track-number">{{ trackSymbol(track.title) }}</div>
                                 <div>
                                     <strong>{{ track.title }}</strong>
-                                    <p>{{ albumArtistList(track.albumId) }} · {{ albumTitle(track.albumId) }}</p>
+                                    <p>{{ track.artistId ? artistName(track.artistId) : albumArtistList(track.albumId) }} · {{ track.albumId ? albumTitle(track.albumId) : 'Без альбома' }} · {{ track.genreId ? genreName(track.genreId) : 'Жанр не указан' }}</p>
                                 </div>
                             </div>
                             <div class="track-list-side">
@@ -337,9 +337,23 @@
                     </label>
                     <label>
                         <span>Альбом</span>
-                        <select v-model.number="modal.form.albumId" size="8" required>
-                            <option disabled value="">Выбери альбом</option>
+                        <select v-model.number="modal.form.albumId" size="8">
+                            <option value="">Без альбома</option>
                             <option v-for="album in reference.albums" :key="album.id" :value="album.id">{{ album.title }}</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Исполнитель</span>
+                        <select v-model.number="modal.form.artistId" size="6">
+                            <option value="">Не выбран</option>
+                            <option v-for="artist in reference.artists" :key="artist.id" :value="artist.id">{{ artist.name }}</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Жанр</span>
+                        <select v-model.number="modal.form.genreId" size="6">
+                            <option value="">Не выбран</option>
+                            <option v-for="genre in reference.genres" :key="genre.id" :value="genre.id">{{ genre.name }}</option>
                         </select>
                     </label>
                     <div class="info-block">

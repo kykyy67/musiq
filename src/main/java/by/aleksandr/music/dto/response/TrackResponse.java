@@ -25,4 +25,7 @@ public class TrackResponse {
 
     @Schema(description = "Artist identifier", example = "3")
     private Long artistId;
+
+    @Schema(description = "Genre identifier", example = "4")
+    private Long genreId;
 }

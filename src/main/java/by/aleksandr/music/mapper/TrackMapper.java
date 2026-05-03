@@ -21,11 +21,12 @@ public final class TrackMapper {
 
         if (track.getAlbum() != null) {
             response.setAlbumId(track.getAlbum().getId());
-
-            if (track.getAlbum().getArtists() != null && !track.getAlbum().getArtists().isEmpty()) {
-                Long firstArtistId = track.getAlbum().getArtists().iterator().next().getId();
-                response.setArtistId(firstArtistId);
-            }
+        }
+        if (track.getArtist() != null) {
+            response.setArtistId(track.getArtist().getId());
+        }
+        if (track.getGenre() != null) {
+            response.setGenreId(track.getGenre().getId());
         }
         return response;
     }

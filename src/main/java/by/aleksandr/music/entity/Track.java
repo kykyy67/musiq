@@ -36,8 +36,14 @@ public class Track {
     @Column(name = "duration_seconds")
     private Integer durationSeconds;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Album album;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Artist artist;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Genre genre;
 
     @ManyToMany(mappedBy = "tracks", fetch = FetchType.LAZY)
     @Builder.Default

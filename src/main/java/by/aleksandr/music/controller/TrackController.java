@@ -54,7 +54,12 @@ public class TrackController {
     @PostMapping
     public ResponseEntity<TrackResponse> create(@Valid @RequestBody TrackRequest request) {
         TrackResponse response = TrackMapper.toResponse(
-                trackService.create(request.getTitle(), request.getDurationSeconds(), request.getAlbumId()));
+                trackService.create(
+                        request.getTitle(),
+                        request.getDurationSeconds(),
+                        request.getAlbumId(),
+                        request.getArtistId(),
+                        request.getGenreId()));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -90,7 +95,13 @@ public class TrackController {
             @PathVariable Long id,
             @Valid @RequestBody TrackRequest request) {
         return TrackMapper.toResponse(
-                trackService.update(id, request.getTitle(), request.getDurationSeconds(), request.getAlbumId()));
+                trackService.update(
+                        id,
+                        request.getTitle(),
+                        request.getDurationSeconds(),
+                        request.getAlbumId(),
+                        request.getArtistId(),
+                        request.getGenreId()));
     }
 
     @Operation(summary = "Delete track")

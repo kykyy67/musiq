@@ -475,7 +475,9 @@
                     return {
                         title: "",
                         durationSeconds: 180,
-                        albumId: ""
+                        albumId: "",
+                        artistId: "",
+                        genreId: ""
                     };
                 }
                 if (type === "artist") {
@@ -502,7 +504,9 @@
                     return {
                         title: item.title,
                         durationSeconds: item.durationSeconds,
-                        albumId: item.albumId
+                        albumId: item.albumId ?? "",
+                        artistId: item.artistId ?? "",
+                        genreId: item.genreId ?? ""
                     };
                 }
                 if (type === "artist" || type === "genre") {
@@ -560,7 +564,9 @@
                     return {
                         title: form.title,
                         durationSeconds: Number(form.durationSeconds),
-                        albumId: Number(form.albumId)
+                        albumId: form.albumId ? Number(form.albumId) : null,
+                        artistId: form.artistId ? Number(form.artistId) : null,
+                        genreId: form.genreId ? Number(form.genreId) : null
                     };
                 }
                 if (type === "user") {

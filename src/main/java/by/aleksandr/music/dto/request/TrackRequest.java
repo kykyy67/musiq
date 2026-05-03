@@ -25,7 +25,12 @@ public class TrackRequest {
     @Schema(description = "Track duration in seconds", example = "187")
     private Integer durationSeconds;
 
-    @NotNull(message = "Album id is required")
     @Schema(description = "Album identifier", example = "1")
     private Long albumId;
+
+    @Schema(description = "Artist identifier", example = "3")
+    private Long artistId;
+
+    @Schema(description = "Genre identifier", example = "4")
+    private Long genreId;
 }
