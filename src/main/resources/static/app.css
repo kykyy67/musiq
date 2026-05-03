@@ -111,6 +111,13 @@ input[type="checkbox"] {
     align-items: center;
     gap: 14px;
     margin-bottom: 28px;
+    cursor: pointer;
+}
+
+.logo:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 6px;
+    border-radius: 12px;
 }
 
 .logo-mark {

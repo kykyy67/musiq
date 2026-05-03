@@ -13,7 +13,7 @@
 <div id="app" v-cloak>
     <div class="layout">
         <aside class="sidebar">
-            <div class="logo">
+            <div class="logo" role="button" tabindex="0" @click="navigate('home')" @keydown.enter.prevent="navigate('home')" @keydown.space.prevent="navigate('home')">
                 <div class="logo-mark"></div>
                 <div>
                     <span class="logo-kicker">music service</span>
