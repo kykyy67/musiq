@@ -1,5 +1,8 @@
 HELP.md
 config/
+!config/
+!config/checkstyle/
+!config/checkstyle/checkstyle.xml
 target/
 logs/
 .m2repo/
