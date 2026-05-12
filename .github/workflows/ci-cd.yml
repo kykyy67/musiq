@@ -57,14 +57,28 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: docker-build
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && secrets.RENDER_DEPLOY_HOOK_URL != '' && secrets.APP_HEALTHCHECK_URL != ''
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    env:
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+      APP_HEALTHCHECK_URL: ${{ secrets.APP_HEALTHCHECK_URL }}
 
     steps:
+      - name: Check deploy secrets
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ] || [ -z "$APP_HEALTHCHECK_URL" ]; then
+            echo "Deploy secrets are not configured. Deploy steps will be skipped."
+          else
+            echo "Deploy secrets are configured."
+          fi
+
       - name: Trigger Render deploy
-        run: curl -fsSL -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+        if: env.RENDER_DEPLOY_HOOK_URL != '' && env.APP_HEALTHCHECK_URL != ''
+        run: curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL"
 
       - name: Wait for application startup
+        if: env.RENDER_DEPLOY_HOOK_URL != '' && env.APP_HEALTHCHECK_URL != ''
         run: sleep 45
 
       - name: Verify production healthcheck
-        run: curl -fsSL "${{ secrets.APP_HEALTHCHECK_URL }}"
+        if: env.RENDER_DEPLOY_HOOK_URL != '' && env.APP_HEALTHCHECK_URL != ''
+        run: curl -fsSL "$APP_HEALTHCHECK_URL"
