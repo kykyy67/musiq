@@ -1,0 +1,12 @@
+target
+.git
+.github
+.idea
+.vscode
+logs
+.m2
+.m2repo
+Dockerfile*
+docker-compose*
+README.md
+

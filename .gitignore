@@ -65,6 +65,12 @@ application-secret.yml
 secrets.yaml
 secrets.yml
 
+# Keep deployment and CI manifests in the repository
+!.github/
+!.github/workflows/
+!.github/workflows/*.yml
+!docker-compose.yml
+
 ### Environment files ###
 .env
 .env.local

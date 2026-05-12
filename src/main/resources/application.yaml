@@ -1,22 +1,33 @@
 server:
-    port: 8080
+    port: ${SERVER_PORT:8080}
 
 spring:
     application:
-        name: music
+        name: ${SPRING_APPLICATION_NAME:music}
     jpa:
         hibernate:
-            ddl-auto: update
-        show-sql: true
+            ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+        show-sql: ${SPRING_JPA_SHOW_SQL:true}
         properties:
             hibernate:
-                format_sql: true
-                highlight_sql: true
-                dialect: org.hibernate.dialect.PostgreSQLDialect
+                format_sql: ${SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL:true}
+                highlight_sql: ${SPRING_JPA_PROPERTIES_HIBERNATE_HIGHLIGHT_SQL:true}
+                dialect: ${SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
     datasource:
-        url: jdbc:postgresql://localhost:5432/musicCatalog
-        username: postgres
-        password: password
+        url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/musicCatalog}
+        username: ${SPRING_DATASOURCE_USERNAME:postgres}
+        password: ${SPRING_DATASOURCE_PASSWORD:password}
+
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health,info
+    endpoint:
+        health:
+            probes:
+                enabled: true
+            show-details: never
 
 springdoc:
     swagger-ui:
