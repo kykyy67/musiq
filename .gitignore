@@ -85,3 +85,8 @@ secrets.yml
 *.swp
 *.swo
 *~
+
+### Database dumps ###
+dump.sql
+*.dump
+*.backup.sql
